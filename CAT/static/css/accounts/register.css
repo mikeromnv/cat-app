@@ -1,0 +1,68 @@
+body {
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+.main-layout {
+    display: block;
+}
+
+/* Скрываем сайдбар */
+.sidebar {
+    display: none;
+}
+
+/* Расширяем контент на всю ширину */
+.content {
+    margin-left: 0;
+    width: 100%;
+}
+.auth-container {
+    width: 100%;
+    max-width: 550px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.auth-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.05);
+    padding: 2rem 2.5rem;
+}
+
+.auth-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #333;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.auth-form .form-control {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    font-size: 0.95rem;
+}
+
+.auth-btn {
+    border-radius: 10px;
+    font-size: 1rem;
+    margin-top: 1rem;
+    padding: 10px 0;
+}
+
+.text-danger {
+    font-size: 0.85rem;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}

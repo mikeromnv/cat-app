@@ -1,0 +1,168 @@
+:root {
+  --sky-blue: #8ecae6;
+  --blue-green: #219ebc;
+  --prussian-blue: #023047;
+  --selective-yellow: #ffb703;
+  --ut-orange: #fb8500;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #f5f7fb;
+  color: #333;
+  margin: 0;
+}
+
+.main-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ==== Sidebar ==== */
+.sidebar {
+  background: var(--prussian-blue);
+  color: white;
+  width: 230px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.5rem;
+  position: fixed;
+  height: 100%;
+}
+
+.sidebar .brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebar .menu {
+  list-style: none;
+  padding: 0;
+  margin-top: 2rem;
+}
+
+.sidebar .menu li {
+  margin-bottom: 1rem;
+}
+
+.sidebar .menu a {
+  text-decoration: none;
+  color: white;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.sidebar .menu a:hover {
+  color: var(--selective-yellow);
+}
+
+.sidebar .auth {
+  text-align: center;
+}
+
+.sidebar .auth .btn {
+  display: inline-block;
+  background: var(--ut-orange);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.sidebar .auth .btn:hover {
+  background: var(--selective-yellow);
+}
+
+/* ==== Main Content ==== */
+.content {
+  margin-left: 230px;
+  padding: 2rem;
+  width: 100%;
+}
+
+/* ==== Buttons ==== */
+.btn {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.btn.primary {
+  background: var(--blue-green);
+  color: white;
+}
+
+.btn.primary:hover {
+  background: var(--ut-orange);
+}
+
+.btn.outline {
+  border: 2px solid var(--blue-green);
+  color: var(--blue-green);
+}
+
+.btn.outline:hover {
+  background: var(--blue-green);
+  color: white;
+}
+
+.btn.success {
+  background: var(--selective-yellow);
+  color: black;
+}
+
+.btn.success:hover {
+  background: var(--ut-orange);
+  color: white;
+}
+
+/* ==== Cards ==== */
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+}
+
+.card h3 {
+  color: var(--prussian-blue);
+  margin-bottom: 0.5rem;
+}
+
+/* ==== Animations ==== */
+.fade-in {
+  animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==== Alerts ==== */
+.alert {
+  background: var(--sky-blue);
+  padding: 1rem;
+  border-radius: 8px;
+  text-align: center;
+}

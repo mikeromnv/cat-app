@@ -1,0 +1,77 @@
+body {
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeIn 0.5s ease-in-out;
+}
+.main-layout {
+    display: block;
+}
+
+/* Скрываем сайдбар */
+.sidebar {
+    display: none;
+}
+
+/* Расширяем контент на всю ширину */
+.content {
+    margin-left: 0;
+    width: 100%;
+}
+.auth-card {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 0 18px rgba(0, 0, 0, 0.05);
+    padding: 2rem;
+    text-align: center;
+}
+
+.auth-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.auth-form .form-group {
+    margin-bottom: 1rem;
+    text-align: left;
+}
+
+.auth-form .form-control {
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    font-size: 0.95rem;
+}
+
+.auth-btn {
+    border-radius: 10px;
+    margin-top: 1rem;
+}
+
+.auth-link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.auth-link a {
+    color: #0d6efd;
+    text-decoration: none;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}

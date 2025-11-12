@@ -1,0 +1,364 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты тестирования - {{ session.test.test_name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <style>
+        .result-card {
+            border: none;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+        }
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto;
+        }
+        .knowledge-level-badge {
+            font-size: 1.1em;
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        .answer-correct {
+            border-left: 4px solid #28a745;
+            background-color: #f8fff9;
+        }
+        .answer-incorrect {
+            border-left: 4px solid #dc3545;
+            background-color: #fff8f8;
+        }
+        .stats-card {
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .theta-scale {
+            height: 10px;
+            background: linear-gradient(90deg, #dc3545, #ffc107, #28a745);
+            border-radius: 5px;
+            position: relative;
+        }
+        .theta-marker {
+            position: absolute;
+            top: -5px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 3px solid #007bff;
+            border-radius: 50%;
+            transform: translateX(-50%);
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<div class="container mt-4 mb-5">
+    <!-- Основная карточка результатов -->
+    <div class="card result-card">
+        <div class="card-header bg-primary text-white text-center py-4" style="border-radius: 20px 20px 0 0;">
+            <div class="row align-items-center">
+                <div class="col-md-8 text-start">
+                    <h2 class="mb-2"><i class="bi bi-trophy me-3"></i>Тестирование завершено!</h2>
+                    <h4 class="mb-0 opacity-75">{{ session.test.test_name }}</h4>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="badge bg-light text-dark fs-6 p-3">
+                        <i class="bi bi-clock me-2"></i>
+                        {{ session.start_time|date:"d.m.Y H:i" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-body p-5">
+            <!-- Основные метрики -->
+            <div class="row mb-5">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="score-circle bg-primary bg-opacity-10 text-primary">
+                        <div class="text-center">
+                            <div class="fs-1 fw-bold">{{ accuracy|floatformat:0 }}%</div>
+                            <small class="text-muted">Точность</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="score-circle bg-success bg-opacity-10 text-success">
+                        <div class="text-center">
+                            <div class="fs-1 fw-bold">{{ correct_answers }}/{{ total_questions }}</div>
+                            <small class="text-muted">Правильные ответы</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 text-center mb-4">
+                    <div class="score-circle bg-info bg-opacity-10 text-info">
+                        <div class="text-center">
+                            <div class="fs-1 fw-bold">{{ session.questions_answered }}</div>
+                            <small class="text-muted">Всего вопросов</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Уровень знаний и шкала theta -->
+            <div class="row mb-5">
+                <div class="col-md-6">
+                    <div class="card stats-card h-100 border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-graph-up me-2 text-primary"></i>Уровень знаний
+                            </h5>
+                            <div class="mb-3">
+                                <span class="knowledge-level-badge
+                                    {% if theta >= 1.0 %}bg-success text-white
+                                    {% elif theta >= 0.0 %}bg-warning text-dark
+                                    {% elif theta >= -1.0 %}bg-info text-white
+                                    {% else %}bg-secondary text-white{% endif %}">
+                                    {{ knowledge_level }}
+                                </span>
+                            </div>
+                            <h3 class="text-primary fw-bold mb-3">θ = {{ theta|floatformat:3 }}</h3>
+                            <div class="theta-scale mt-4">
+                                <div class="theta-marker" style="left: calc(50% + {{ theta }} * 16.67%);"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2 text-sm">
+                                <small class="text-danger">Низкий</small>
+                                <small class="text-warning">Средний</small>
+                                <small class="text-success">Высокий</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card stats-card h-100 border-0 bg-light">
+                        <div class="card-body text-center">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-speedometer2 me-2 text-success"></i>Точность оценки
+                            </h5>
+                            <div class="mb-4">
+                                <div class="fs-2 fw-bold text-success mb-2">
+                                    {{ standard_error|floatformat:3 }}
+                                </div>
+                                <div class="progress" style="height: 10px;">
+                                    <div class="progress-bar
+                                        {% if standard_error < 0.1 %}bg-success
+                                        {% elif standard_error < 0.3 %}bg-warning
+                                        {% else %}bg-danger{% endif %}"
+                                        style="width: {% widthratio 1 standard_error 100 %}%">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="small text-muted">
+                                {% if standard_error < 0.1 %}
+                                <i class="bi bi-check-circle-fill text-success me-1"></i>
+                                Высокая точность измерения
+                                {% elif standard_error < 0.3 %}
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-1"></i>
+                                Средняя точность измерения
+                                {% else %}
+                                <i class="bi bi-info-circle-fill text-danger me-1"></i>
+                                Низкая точность измерения
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Детальная статистика -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 bg-primary bg-opacity-5">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <i class="bi bi-bar-chart me-2"></i>Детальная статистика
+                            </h5>
+                            <div class="row text-center">
+                                <div class="col-md-3 mb-3">
+                                    <div class="fw-bold fs-4 text-primary">{{ total_questions }}</div>
+                                    <small class="text-muted">Всего вопросов</small>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="fw-bold fs-4 text-success">{{ correct_answers }}</div>
+                                    <small class="text-muted">Правильные ответы</small>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="fw-bold fs-4 text-danger">{{ total_questions|add:"-correct_answers" }}</div>
+                                    <small class="text-muted">Неправильные ответы</small>
+                                </div>
+                                <div class="col-md-3 mb-3">
+                                    <div class="fw-bold fs-4 text-info">
+                                        {{ session.end_time|timeuntil:session.start_time }}
+                                    </div>
+                                    <small class="text-muted">Время прохождения</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- История ответов -->
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3">
+                        <i class="bi bi-list-check me-2"></i>История ответов
+                    </h5>
+                    <div class="list-group">
+                        {% for user_answer in user_answers %}
+                        <div class="list-group-item {% if user_answer.is_correct %}answer-correct{% else %}answer-incorrect{% endif %} mb-2 rounded-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="badge {% if user_answer.is_correct %}bg-success{% else %}bg-danger{% endif %} me-2">
+                                            {{ forloop.counter }}
+                                        </span>
+                                        <strong>{{ user_answer.question.text_question }}</strong>
+                                    </div>
+                                    <div class="ms-4">
+                                        <small class="text-muted">
+                                            Ваш ответ: <strong>{{ user_answer.selected_answer.answer_text }}</strong>
+                                            {% if not user_answer.is_correct %}
+                                            <br>Правильный ответ: <strong class="text-success">
+                                                {{ user_answer.question.correct_answer.answer_text }}
+                                            </strong>
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge {% if user_answer.is_correct %}bg-success{% else %}bg-danger{% endif %}">
+                                        {% if user_answer.is_correct %}
+                                        <i class="bi bi-check-lg"></i> Верно
+                                        {% else %}
+                                        <i class="bi bi-x-lg"></i> Неверно
+                                        {% endif %}
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        θ: {{ user_answer.ability_after_answer|floatformat:2 }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Футер с действиями -->
+        <div class="card-footer bg-light text-center py-4" style="border-radius: 0 0 20px 20px;">
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'adaptive_test_list' %}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-list-ul me-2"></i>К списку тестов
+                    </a>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'start_adaptive_test' test_id=session.test.test_id %}" class="btn btn-primary w-100">
+                        <i class="bi bi-arrow-repeat me-2"></i>Пройти еще раз
+                    </a>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <a href="{% url 'index' %}" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-house me-2"></i>На главную
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Блок с рекомендациями -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 bg-warning bg-opacity-10">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-lightbulb me-2"></i>Рекомендации по результатам
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-check-circle text-success me-2"></i>
+                                    <strong>Ваш уровень:</strong> {{ knowledge_level }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-graph-up text-primary me-2"></i>
+                                    <strong>Точность оценки:</strong>
+                                    {% if standard_error < 0.1 %}Очень высокая
+                                    {% elif standard_error < 0.3 %}Хорошая
+                                    {% else %}Можно улучшить{% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="bi bi-clock text-info me-2"></i>
+                                    <strong>Время:</strong> {{ session.end_time|timeuntil:session.start_time }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-target text-success me-2"></i>
+                                    <strong>Цель:</strong>
+                                    {% if theta < 0 %}Освоить базовые понятия
+                                    {% elif theta < 1 %}Углубить знания
+                                    {% else %}Совершенствовать навыки{% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Анимация появления элементов
+    document.addEventListener('DOMContentLoaded', function() {
+        const elements = document.querySelectorAll('.score-circle, .stats-card');
+        elements.forEach((element, index) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                element.style.transition = 'all 0.6s ease';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+
+        // Показываем congratulation message
+        setTimeout(() => {
+            const congratulation = document.createElement('div');
+            congratulation.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-3';
+            congratulation.style.zIndex = '1050';
+            congratulation.innerHTML = `
+                <i class="bi bi-emoji-laughing me-2"></i>
+                <strong>Поздравляем с завершением теста!</strong> Ваши результаты сохранены.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(congratulation);
+        }, 1000);
+    });
+</script>
+
+</body>
+</html>

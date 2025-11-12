@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вопросы — CATWise{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/testing/questions.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="questions-page fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Список вопросов</h2>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+            Добавить вопрос
+        </button>
+    </div>
+
+    <div id="questions-container" class="row g-3">
+        {% for question in questions %}
+        <div class="col-md-6 col-lg-4">
+            <div class="question-card">
+                <h6 class="fw-bold">{{ question.text_question|truncatechars:80 }}</h6>
+                <p class="text-muted small mb-1">
+                    <strong>Тема:</strong> {{ question.topic.topic_name }}<br>
+                    <strong>Сложность:</strong> {{ question.difficulty }}
+                </p>
+                <p class="small mb-2">Автор: {{ question.author.username }}</p>
+
+                {% if user.is_authenticated and user == question.author %}
+                <div class="d-flex gap-2 mt-2">
+                    <button class="btn btn-outline-success btn-sm edit-btn" data-id="{{ question.question_id }}">
+                        ✏️
+                    </button>
+                    <button class="btn btn-outline-danger btn-sm delete-btn" data-id="{{ question.question_id }}">
+                        🗑️
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-muted text-center">Пока нет вопросов.</p>
+        {% endfor %}
+    </div>
+
+    <div class="text-center mt-4">
+        <button id="loadMoreBtn" class="btn btn-outline-primary">Показать ещё</button>
+    </div>
+</div>
+
+<!-- Модальное окно добавления вопроса -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="addQuestionForm" method="post" action="{% url 'add_question' %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title fw-bold" id="addQuestionModalLabel">Добавить новый вопрос</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+        </div>
+
+        <div class="modal-body">
+          {% for field in form %}
+            <div class="mb-3">
+              <label class="form-label">{{ field.label }}</label>
+              {{ field }}
+              {% if field.errors %}
+                <div class="text-danger small mt-1">{{ field.errors.as_text|cut:"*" }}</div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <hr>
+          <h6 class="fw-bold">Варианты ответов</h6>
+          <div id="answers-container">
+            <div class="input-group mb-2 answer-row">
+              <div class="input-group-text">
+                <input type="radio" name="correct_answer" value="0" required>
+              </div>
+              <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
+              <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+            </div>
+          </div>
+
+          <button type="button" id="addAnswerBtn" class="btn btn-outline-secondary btn-sm mt-2">
+            + Добавить вариант
+          </button>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Сохранить</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'testing/js/add_answers.js' %}"></script>
+<script src="{% static 'testing/js/questions_delete.js' %}"></script>
+<script src="{% static 'testing/js/questions_pagination.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Профиль студента - {{ user.username }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<link rel="stylesheet" href="{% static 'css/accounts/student_profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container mt-4 mb-5 fade-in">
+    <!-- Заголовок профиля -->
+    <div class="card profile-card mb-4">
+        <div class="card-header profile-header py-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="mb-2 profile-title"><i class="bi bi-person-circle me-3"></i>Профиль студента</h2>
+                    <h4 class="mb-0 profile-subtitle">{{ user.full_name|default:user.username }}</h4>
+                </div>
+                <div class="col-md-4 text-end">
+                    <span class="level-badge-main">
+                        <i class="bi bi-award me-2"></i>Уровень:
+                        {% if overall_accuracy >= 80 %}Эксперт
+                        {% elif overall_accuracy >= 60 %}Продвинутый
+                        {% elif overall_accuracy >= 40 %}Средний
+                        {% else %}Начинающий{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основная статистика -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card stat-tests text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-clipboard-check stat-icon"></i>
+                    <h3 class="stat-number">{{ total_tests }}</h3>
+                    <p class="stat-label">Пройдено тестов</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card stat-questions text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-check-circle stat-icon"></i>
+                    <h3 class="stat-number">{{ total_questions }}</h3>
+                    <p class="stat-label">Всего вопросов</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card stat-correct text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-trophy stat-icon"></i>
+                    <h3 class="stat-number">{{ total_correct }}</h3>
+                    <p class="stat-label">Правильных ответов</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card stat-card stat-accuracy text-center h-100">
+                <div class="card-body">
+                    <i class="bi bi-graph-up stat-icon"></i>
+                    <h3 class="stat-number">{{ overall_accuracy }}%</h3>
+                    <p class="stat-label">Общая точность</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Прогресс по темам -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card profile-card">
+                <div class="card-header section-header">
+                    <h5 class="mb-0 section-title"><i class="bi bi-book me-2"></i>Прогресс по темам</h5>
+                </div>
+                <div class="card-body">
+                    {% if topics_progress %}
+                    <div class="row">
+                        {% for topic_data in topics_progress %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card topic-card h-100">
+                                <div class="card-body">
+                                    <h6 class="topic-name">{{ topic_data.topic.topic_name }}</h6>
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <small class="text-muted">Пройдено тестов: {{ topic_data.tests_count }}</small>
+                                        <span class="level-badge-topic
+                                            {% if topic_data.avg_theta >= 1.0 %}level-expert
+                                            {% elif topic_data.avg_theta >= 0.0 %}level-advanced
+                                            {% else %}level-beginner{% endif %}">
+                                            {{ topic_data.level }}
+                                        </span>
+                                    </div>
+
+                                    <div class="theta-scale mb-2">
+                                        <div class="theta-marker" style="left: calc(50% + {{ topic_data.avg_theta }} * 16.67%);"></div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between theta-info">
+                                        <small>Средний θ: {{ topic_data.avg_theta|floatformat:2 }}</small>
+                                        <small>Лучший: {{ topic_data.best_theta|floatformat:2 }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center py-4">
+                        <i class="bi bi-inbox empty-icon"></i>
+                        <p class="empty-text">Пока нет данных о пройденных тестах</p>
+                        <a href="{% url 'adaptive_test_list' %}" class="btn btn-primary empty-btn">
+                            Пройти первый тест
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- График прогресса -->
+    {% if progress_data %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card profile-card">
+                <div class="card-header section-header">
+                    <h5 class="mb-0 section-title"><i class="bi bi-graph-up me-2"></i>Динамика уровня знаний</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="progressChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Последние тестирования -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card profile-card">
+                <div class="card-header section-header">
+                    <h5 class="mb-0 section-title"><i class="bi bi-clock-history me-2"></i>Последние тестирования</h5>
+                </div>
+                <div class="card-body">
+                    {% if recent_sessions %}
+                    <div class="session-list">
+                        {% for session in recent_sessions %}
+                        <div class="session-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="session-test-name">{{ session.test.test_name }}</h6>
+                                    <small class="session-meta">
+                                        {{ session.end_time|date:"d.m.Y H:i" }} •
+                                        {{ session.test.topic.topic_name }}
+                                    </small>
+                                </div>
+                                <div class="text-end">
+                                    <span class="theta-badge
+                                        {% if session.current_ability_estimate >= 1.0 %}theta-expert
+                                        {% elif session.current_ability_estimate >= 0.0 %}theta-advanced
+                                        {% else %}theta-beginner{% endif %}">
+                                        θ = {{ session.current_ability_estimate|floatformat:2 }}
+                                    </span>
+                                    <br>
+                                    <small class="session-se">
+                                        SE: {{ session.standard_error|floatformat:3 }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty-state text-center py-3">
+                        <p class="empty-text">Пока нет завершенных тестирований</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if progress_data %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        const progressData = {{ progress_data|safe }};
+
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: progressData.map(item => item.date),
+                datasets: [{
+                    label: 'Уровень знаний (θ)',
+                    data: progressData.map(item => item.theta),
+                    borderColor: '#4361ee',
+                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#4361ee',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        labels: {
+                            font: {
+                                family: "'Segoe UI', system-ui, sans-serif"
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#333',
+                        bodyColor: '#333',
+                        borderColor: '#4361ee',
+                        borderWidth: 1,
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const index = context.dataIndex;
+                                return progressData[index].test_name;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Уровень знаний (θ)',
+                            font: {
+                                family: "'Segoe UI', system-ui, sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Дата тестирования',
+                            font: {
+                                family: "'Segoe UI', system-ui, sans-serif"
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endif %}
+{% endblock %}

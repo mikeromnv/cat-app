@@ -1,0 +1,25 @@
+<nav class="sidebar">
+    <div class="brand">
+        🐱 <span>CATWise</span>
+    </div>
+
+    <ul class="menu">
+        {% if user.is_authenticated %}
+            {% if user.role and user.role.role_name == "Преподаватель" %}
+                <li><a href="{% url 'questions' %}">Вопросы</a></li>
+                <li><a href="{% url 'create_test' %}">Создать тест</a></li>
+            {% elif user.role and user.role.role_name == "Студент" %}
+                <li><a href="{% url 'student_profile' %}">Профиль</a></li>
+            {% endif %}
+        {% endif %}
+    </ul>
+
+    <div class="auth">
+        {% if user.is_authenticated %}
+            <p>Привет, {{ user.username }}</p>
+            <a href="{% url 'logout' %}" class="btn">Выйти</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn">Войти</a>
+        {% endif %}
+    </div>
+</nav>

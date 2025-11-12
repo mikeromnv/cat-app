@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход - CAT System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts/login.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container fade-in">
+    <div class="auth-card">
+        <h3 class="auth-title">Вход в систему</h3>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="email" class="form-label">Email:</label>
+                <input type="email" name="email" class="form-control" required value="{{ email_value|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label for="password" class="form-label">Пароль:</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 auth-btn">Войти</button>
+        </form>
+
+        <p class="auth-link text-center">
+            Нет аккаунта? <a href="{% url 'register' %}">Зарегистрироваться</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

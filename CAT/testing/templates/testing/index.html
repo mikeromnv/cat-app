@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Главная — CATWise{% endblock %}
+
+{% block content %}
+<div class="text-center fade-in">
+    <h1>CATWise</h1>
+    <p>Адаптивное тестирование под твой уровень знаний 🎯</p>
+
+    {% if not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn primary">Войти</a>
+        <a href="{% url 'register' %}" class="btn outline">Регистрация</a>
+    {% endif %}
+</div>
+
+{% if tests %}
+    <div class="tests-grid fade-in">
+        {% for test in tests %}
+            <div class="card">
+                <h3>{{ test.test_name }}</h3>
+                <p class="small">
+                    <strong>Тема:</strong> {{ test.topic.topic_name }}<br>
+                    <strong>Вопросов:</strong> {{ test.num_of_questions|default:"не указано" }}<br>
+                    <strong>Автор:</strong> {{ test.author.username }}
+                </p>
+
+                {% if user.is_authenticated and user.role.role_name == "Студент" %}
+                    <a href="{% url 'start_adaptive_test' test_id=test.test_id %}" class="btn success">Пройти тест</a>
+                {% elif user.is_authenticated and user.role.role_name == "Преподаватель" %}
+                    <a href="{% url 'edit_test' test_id=test.test_id %}" class="btn outline">Редактировать</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn outline">Войти, чтобы пройти</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert">Пока нет доступных тестов.</div>
+{% endif %}
+{% endblock %}
