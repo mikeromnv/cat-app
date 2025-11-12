@@ -16,6 +16,8 @@ urlpatterns = [
     path('remove-question-from-test/<int:test_id>/<int:question_id>/', views.remove_question_from_test,
          name='remove_question_from_test'),
     path('delete_question/<int:question_id>/', views.delete_question, name='delete_question'),
+    # path('get_question_data/<int:question_id>/', views.get_question_data, name='get_question_data'),
+    # path('update_question/<int:question_id>/', views.update_question, name='update_question'),
 
 
     path('adaptive-tests/', views.adaptive_test_list, name='adaptive_test_list'),

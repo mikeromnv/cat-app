@@ -29,9 +29,12 @@
 
                 {% if user.is_authenticated and user == question.author %}
                 <div class="d-flex gap-2 mt-2">
-                    <button class="btn btn-outline-success btn-sm edit-btn" data-id="{{ question.question_id }}">
-                        ✏️
-                    </button>
+                    <a href="{% url 'questions' %}?edit_id={{ question.question_id }}" class="btn btn-outline-success btn-sm">✏️</a>
+
+
+
+
+
                     <button class="btn btn-outline-danger btn-sm delete-btn" data-id="{{ question.question_id }}">
                         🗑️
                     </button>
@@ -51,10 +54,13 @@
 
 <!-- Модальное окно добавления вопроса -->
 <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
+
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form id="addQuestionForm" method="post" action="{% url 'add_question' %}">
         {% csrf_token %}
+        <input type="hidden" name="question_id" value="{{ edit_question.question_id|default:'' }}">
+
         <div class="modal-header">
           <h5 class="modal-title fw-bold" id="addQuestionModalLabel">Добавить новый вопрос</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
@@ -74,14 +80,36 @@
           <hr>
           <h6 class="fw-bold">Варианты ответов</h6>
           <div id="answers-container">
-            <div class="input-group mb-2 answer-row">
-              <div class="input-group-text">
-                <input type="radio" name="correct_answer" value="0" required>
-              </div>
-              <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
-              <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
-            </div>
+              {% if edit_question %}
+                {% for ans in edit_question.answers_set.all %}
+                  <div class="input-group mb-2 answer-row">
+                    <div class="input-group-text">
+                      <input type="radio" name="correct_answer" value="{{ forloop.counter0 }}" {% if ans.is_correct %}checked{% endif %} required>
+                    </div>
+                    <input type="text" name="answer_text[]" class="form-control" value="{{ ans.answer_text }}" required>
+                    <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+                  </div>
+                {% endfor %}
+              {% else %}
+                <div class="input-group mb-2 answer-row">
+                  <div class="input-group-text">
+                    <input type="radio" name="correct_answer" value="0" required>
+                  </div>
+                  <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
+                  <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+                </div>
+              {% endif %}
           </div>
+            {% if edit_question %}
+            <!-- Скрипт открытия модалки нужно поставить здесь, после всей модалки -->
+            <script>
+              document.addEventListener("DOMContentLoaded", function() {
+                  var myModal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+                  myModal.show();
+              });
+            </script>
+            {% endif %}
+
 
           <button type="button" id="addAnswerBtn" class="btn btn-outline-secondary btn-sm mt-2">
             + Добавить вариант
@@ -90,17 +118,25 @@
 
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">Сохранить</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="button" class="btn btn-secondary"
+                data-bs-dismiss="modal"
+                onclick="window.location='?';">
+                Отмена
+        </button>
+
         </div>
       </form>
     </div>
   </div>
 </div>
 
+
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'testing/js/add_answers.js' %}"></script>
+
 <script src="{% static 'testing/js/questions_delete.js' %}"></script>
 <script src="{% static 'testing/js/questions_pagination.js' %}"></script>
+
 {% endblock %}

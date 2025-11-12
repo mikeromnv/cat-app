@@ -1,3 +1,5 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
@@ -8,7 +10,7 @@ from django.contrib import messages
 from django.utils import timezone
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 
 from .cat_algorithm import CATAlgorithm3PL
 from .forms import QuestionForm
@@ -25,10 +27,47 @@ def index(request):
     # authors = Users.objects.filter(role_id=2)
     return render(request, 'testing/index.html', {'tests': tests})
 
-
-
 @login_required(login_url='login')
 def questions_view(request):
+    user = request.user
+    if not hasattr(user, 'role') or user.role.role_name != 'Преподаватель':
+        messages.error(request, 'Доступ только для преподавателей.')
+        return redirect('index')
+
+    questions = Questions.objects.select_related('topic', 'author').order_by('-question_id')
+    paginator = Paginator(questions, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    topics = Topic.objects.all()
+
+    edit_question = None
+    edit_id = request.GET.get('edit_id')
+    if edit_id:
+        edit_question = get_object_or_404(Questions, pk=edit_id)
+        form = QuestionForm(instance=edit_question)
+    else:
+        edit_question = None
+        form = QuestionForm()
+    context = {
+        'questions': page_obj,
+        'topics': topics,
+        'form': form,
+        'edit_question': edit_question
+    }
+    return render(request, 'testing/questions.html', context)
+
+
+
+
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect, get_object_or_404
+from .models import Questions, Answers
+from .forms import QuestionForm
+
+@login_required(login_url='login')
+def add_question(request):
     user = request.user
 
     # Проверка роли
@@ -36,66 +75,59 @@ def questions_view(request):
         messages.error(request, 'Доступ только для преподавателей.')
         return redirect('index')
 
-    # Получаем вопросы с оптимизацией выборки
-    questions = Questions.objects.select_related('topic', 'author').order_by('-question_id')
-
-    # Пагинация по 20 вопросов
-    paginator = Paginator(questions, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    # Получаем список тем и форму для добавления вопроса
-    topics = Topic.objects.all()
-    form = QuestionForm()
-
-    context = {
-        'questions': page_obj,
-        'topics': topics,
-        'form': form
-    }
-
-    # Если AJAX-запрос — отрисовываем только часть контента (для "Показать ещё")
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return render(request, 'testing/questions_list_partial.html', context)
-
-    # Основной рендер всей страницы
-    return render(request, 'testing/questions.html', context)
-
-@login_required
-def add_question(request):
-    if not request.user.role or request.user.role.role_name != 'Преподаватель':
-        return JsonResponse({"success": False, "error": "Только преподаватели могут добавлять вопросы."})
-
     if request.method == 'POST':
+        question_id = request.POST.get('question_id')
         form = QuestionForm(request.POST)
-        answers = request.POST.getlist('answer_text[]')
-        correct_answer_index = request.POST.get('correct_answer')
+        answers_texts = request.POST.getlist('answer_text[]')
+        correct_index = request.POST.get('correct_answer')
 
-        if form.is_valid() and answers:
-            with transaction.atomic():
-                question = form.save(commit=False)
-                question.author = request.user
+        if form.is_valid() and answers_texts and correct_index is not None:
+            if question_id:  # редактирование существующего вопроса
+                question = get_object_or_404(Questions, pk=question_id)
+                # Обновляем поля вопроса
+                question.text_question = form.cleaned_data['text_question']
+                question.topic = form.cleaned_data['topic']
+                question.difficulty = form.cleaned_data['difficulty']
+                question.discrimination = form.cleaned_data['discrimination']
+                question.guessing = form.cleaned_data['guessing']
                 question.save()
 
-                for i, answer_text in enumerate(answers):
-                    if not answer_text.strip():
-                        continue
-                    Answers.objects.create(
-                        question=question,
-                        answer_text=answer_text.strip(),
-                        is_correct=str(i) == correct_answer_index,
-                        answer_number=i + 1
-                    )
+                # Удаляем старые ответы, чтобы создать новые
+                Answers.objects.filter(question=question).delete()
+            else:  # добавление нового вопроса
+                question = form.save(commit=False)
+                question.author = user
+                question.save()
 
-            return JsonResponse({
-                "success": True,
-                "message": "Вопрос успешно добавлен",
-                "question": question.text_question
-            })
+            # Создаём ответы
+            answers = []
+            for idx, text in enumerate(answers_texts):
+                answer = Answers.objects.create(
+                    question=question,
+                    answer_number=idx,
+                    answer_text=text,
+                    is_correct=(str(idx) == correct_index)
+                )
+                answers.append(answer)
+
+            # Устанавливаем правильный ответ
+            question.correct_answer = answers[int(correct_index)]
+            question.save()
+
+            if question_id:
+                messages.success(request, 'Вопрос успешно обновлён.')
+            else:
+                messages.success(request, 'Вопрос успешно добавлен.')
+
+            return redirect('questions')
         else:
-            return JsonResponse({"success": False, "error": "Некорректно заполнена форма."})
+            messages.error(request, 'Ошибка при сохранении вопроса. Проверьте форму и ответы.')
 
-    return render(request, 'testing/questions.html')
+    return redirect('questions')
+
+
+
+
 
 @login_required
 @require_http_methods(["DELETE"])
@@ -113,6 +145,11 @@ def delete_question(request, question_id):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+
+
+##############################
 
 @login_required
 def create_test(request):
