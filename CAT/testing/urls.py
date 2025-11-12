@@ -25,7 +25,9 @@ urlpatterns = [
     path('take-adaptive-test/<int:session_id>/', views.take_adaptive_test, name='take_adaptive_test'),
     path('adaptive-test-results/<int:session_id>/', views.adaptive_test_results, name='adaptive_test_results'),
 
-    # path('ajax/add_question/', views.ajax_add_question, name='ajax_add_question'),
+    path('get_test_statistics/<int:session_id>/', views.get_test_statistics, name='get_test_statistics'),
+
+
 
 
 ]

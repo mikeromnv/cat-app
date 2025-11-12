@@ -531,3 +531,33 @@ def adaptive_test_list(request):
     }
 
     return render(request, 'testing/adaptive_test_list.html', context)
+
+@login_required
+def get_test_statistics(request, session_id):
+    session = get_object_or_404(TestSessions, session_id=session_id, user=request.user)
+    user_answers = UserAnswers.objects.filter(session=session).select_related(
+        'question', 'selected_answer', 'question__correct_answer'
+    )
+
+    answers_data = []
+    for ua in user_answers:
+        answers_data.append({
+            'question': ua.question.text_question,
+            'selected': ua.selected_answer.answer_text if ua.selected_answer else "—",
+            'correct': ua.question.correct_answer.answer_text if ua.question.correct_answer else "—",
+            'is_correct': ua.is_correct,
+        })
+
+    return JsonResponse({
+        'success': True,
+        'test_name': session.test.test_name,
+        'total_questions': user_answers.count(),
+        'correct_answers': user_answers.filter(is_correct=True).count(),
+        'accuracy': round((user_answers.filter(is_correct=True).count() / user_answers.count() * 100), 1) if user_answers.exists() else 0,
+        'theta': round(session.current_ability_estimate or 0, 3),
+        'standard_error': round(session.standard_error or 0, 3),
+        'knowledge_level': "Экспертный" if (session.current_ability_estimate or 0) >= 1.5 else "Средний",
+        'level_description': "Отличное понимание темы" if (session.current_ability_estimate or 0) >= 1.5 else "Базовое понимание темы",
+        'answers': answers_data,
+    })
+

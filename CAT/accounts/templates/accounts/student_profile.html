@@ -4,272 +4,180 @@
 {% block title %}Профиль студента - {{ user.username }}{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <link rel="stylesheet" href="{% static 'css/accounts/student_profile.css' %}">
+
 {% endblock %}
 
 {% block content %}
-<div class="profile-container mt-4 mb-5 fade-in">
-    <!-- Заголовок профиля -->
-    <div class="card profile-card mb-4">
-        <div class="card-header profile-header py-4">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h2 class="mb-2 profile-title"><i class="bi bi-person-circle me-3"></i>Профиль студента</h2>
-                    <h4 class="mb-0 profile-subtitle">{{ user.full_name|default:user.username }}</h4>
-                </div>
-                <div class="col-md-4 text-end">
-                    <span class="level-badge-main">
-                        <i class="bi bi-award me-2"></i>Уровень:
-                        {% if overall_accuracy >= 80 %}Эксперт
-                        {% elif overall_accuracy >= 60 %}Продвинутый
-                        {% elif overall_accuracy >= 40 %}Средний
-                        {% else %}Начинающий{% endif %}
-                    </span>
-                </div>
-            </div>
-        </div>
+<div class="container mt-4 mb-5 fade-in">
+  <h2 class="fw-bold mb-3"><i class="bi bi-person-circle me-2"></i>Профиль студента</h2>
+  <p class="fs-5 mb-4 text-muted">{{ user.full_name|default:user.username }}</p>
+
+  <!-- Основная статистика -->
+  <div class="row text-center mb-4">
+    <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ total_tests }}</h4><p class="mb-0">Пройдено тестов</p></div></div>
+    <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ total_questions }}</h4><p class="mb-0">Всего вопросов</p></div></div>
+    <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ total_correct }}</h4><p class="mb-0">Правильных ответов</p></div></div>
+    <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ overall_accuracy }}%</h4><p class="mb-0">Точность</p></div></div>
+  </div>
+
+  <!-- Прогресс по темам -->
+  <div class="card mb-4">
+    <div class="card-header"><strong>Прогресс по темам</strong></div>
+    <div class="card-body">
+      {% if topics_progress %}
+        <ul class="list-group">
+          {% for topic_data in topics_progress %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>{{ topic_data.topic.topic_name }}</span>
+              <span class="text-muted small">Средний θ: {{ topic_data.avg_theta|floatformat:2 }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">Пока нет данных о пройденных тестах.</p>
+      {% endif %}
     </div>
+  </div>
 
-    <!-- Основная статистика -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card stat-tests text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-clipboard-check stat-icon"></i>
-                    <h3 class="stat-number">{{ total_tests }}</h3>
-                    <p class="stat-label">Пройдено тестов</p>
+  <!-- Последние тесты -->
+  <div class="card">
+    <div class="card-header"><strong>Последние тестирования</strong></div>
+    <div class="card-body">
+      {% if recent_sessions %}
+        <ul class="list-group">
+          {% for session in recent_sessions %}
+            <li class="list-group-item d-flex justify-content-between align-items-center fade-in">
+              <div>
+                <strong>{{ session.test.test_name }}</strong><br>
+                <small class="text-muted">{{ session.end_time|date:"d.m.Y H:i" }}</small>
+              </div>
+                <div class="d-flex justify-content-between">
+                  <div class="text-end">
+                    <span class="badge bg-primary">θ = {{ session.current_ability_estimate|floatformat:2 }}</span><br>
+                    <small>SE: {{ session.standard_error|floatformat:3 }}</small>
+                  </div>
+
+                      <button class="btn btn-outline-primary btn-sm ms-3"
+                        onclick="openTestStats('{{ session.session_id }}')">
+                        Смотреть статистику
+                      </button>
+
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card stat-questions text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-check-circle stat-icon"></i>
-                    <h3 class="stat-number">{{ total_questions }}</h3>
-                    <p class="stat-label">Всего вопросов</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card stat-correct text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-trophy stat-icon"></i>
-                    <h3 class="stat-number">{{ total_correct }}</h3>
-                    <p class="stat-label">Правильных ответов</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 mb-3">
-            <div class="card stat-card stat-accuracy text-center h-100">
-                <div class="card-body">
-                    <i class="bi bi-graph-up stat-icon"></i>
-                    <h3 class="stat-number">{{ overall_accuracy }}%</h3>
-                    <p class="stat-label">Общая точность</p>
-                </div>
-            </div>
-        </div>
+
+
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">Пока нет завершённых тестов.</p>
+      {% endif %}
     </div>
-
-    <!-- Прогресс по темам -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card profile-card">
-                <div class="card-header section-header">
-                    <h5 class="mb-0 section-title"><i class="bi bi-book me-2"></i>Прогресс по темам</h5>
-                </div>
-                <div class="card-body">
-                    {% if topics_progress %}
-                    <div class="row">
-                        {% for topic_data in topics_progress %}
-                        <div class="col-md-6 mb-3">
-                            <div class="card topic-card h-100">
-                                <div class="card-body">
-                                    <h6 class="topic-name">{{ topic_data.topic.topic_name }}</h6>
-
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <small class="text-muted">Пройдено тестов: {{ topic_data.tests_count }}</small>
-                                        <span class="level-badge-topic
-                                            {% if topic_data.avg_theta >= 1.0 %}level-expert
-                                            {% elif topic_data.avg_theta >= 0.0 %}level-advanced
-                                            {% else %}level-beginner{% endif %}">
-                                            {{ topic_data.level }}
-                                        </span>
-                                    </div>
-
-                                    <div class="theta-scale mb-2">
-                                        <div class="theta-marker" style="left: calc(50% + {{ topic_data.avg_theta }} * 16.67%);"></div>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between theta-info">
-                                        <small>Средний θ: {{ topic_data.avg_theta|floatformat:2 }}</small>
-                                        <small>Лучший: {{ topic_data.best_theta|floatformat:2 }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="empty-state text-center py-4">
-                        <i class="bi bi-inbox empty-icon"></i>
-                        <p class="empty-text">Пока нет данных о пройденных тестах</p>
-                        <a href="{% url 'adaptive_test_list' %}" class="btn btn-primary empty-btn">
-                            Пройти первый тест
-                        </a>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- График прогресса -->
-    {% if progress_data %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card profile-card">
-                <div class="card-header section-header">
-                    <h5 class="mb-0 section-title"><i class="bi bi-graph-up me-2"></i>Динамика уровня знаний</h5>
-                </div>
-                <div class="card-body">
-                    <canvas id="progressChart" height="100"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Последние тестирования -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card profile-card">
-                <div class="card-header section-header">
-                    <h5 class="mb-0 section-title"><i class="bi bi-clock-history me-2"></i>Последние тестирования</h5>
-                </div>
-                <div class="card-body">
-                    {% if recent_sessions %}
-                    <div class="session-list">
-                        {% for session in recent_sessions %}
-                        <div class="session-item">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h6 class="session-test-name">{{ session.test.test_name }}</h6>
-                                    <small class="session-meta">
-                                        {{ session.end_time|date:"d.m.Y H:i" }} •
-                                        {{ session.test.topic.topic_name }}
-                                    </small>
-                                </div>
-                                <div class="text-end">
-                                    <span class="theta-badge
-                                        {% if session.current_ability_estimate >= 1.0 %}theta-expert
-                                        {% elif session.current_ability_estimate >= 0.0 %}theta-advanced
-                                        {% else %}theta-beginner{% endif %}">
-                                        θ = {{ session.current_ability_estimate|floatformat:2 }}
-                                    </span>
-                                    <br>
-                                    <small class="session-se">
-                                        SE: {{ session.standard_error|floatformat:3 }}
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    {% else %}
-                    <div class="empty-state text-center py-3">
-                        <p class="empty-text">Пока нет завершенных тестирований</p>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
+
+<!-- Модальное окно -->
+<div class="modal fade" id="testStatsModal" tabindex="-1" aria-labelledby="testStatsLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="testStatsLabel">Результаты теста</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+          <p><strong>Название теста:</strong> <span id="statTestName"></span></p>
+          <p><strong>Всего вопросов:</strong> <span id="statTotal"></span></p>
+          <p><strong>Правильных ответов:</strong> <span id="statCorrect"></span></p>
+          <p><strong>Точность:</strong> <span id="statAccuracy"></span>%</p>
+          <p><strong>Theta:</strong> <span id="statTheta"></span></p>
+          <p><strong>Стандартная ошибка:</strong> <span id="statError"></span></p>
+          <hr>
+          <h6><strong>Уровень знаний:</strong> <span id="statLevel"></span></h6>
+          <p id="statDescription" class="text-muted"></p>
+        </div>
+
+        <hr>
+        <h6 class="mt-3"><strong>Ответы студента:</strong></h6>
+        <div id="statAnswers" class="answer-list"></div>
+
+          <table class="table table-striped align-middle">
+            <thead>
+              <tr>
+                <th>№</th>
+                <th>Вопрос</th>
+                <th>Ваш ответ</th>
+                <th>Статус</th>
+                <th>Правильный ответ</th>
+              </tr>
+            </thead>
+            <tbody id="answersTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% if progress_data %}
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('progressChart').getContext('2d');
-        const progressData = {{ progress_data|safe }};
+function openTestStats(sessionId) {
+  fetch(`/get_test_statistics/${sessionId}/`)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) throw new Error("Ошибка данных");
 
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: progressData.map(item => item.date),
-                datasets: [{
-                    label: 'Уровень знаний (θ)',
-                    data: progressData.map(item => item.theta),
-                    borderColor: '#4361ee',
-                    backgroundColor: 'rgba(67, 97, 238, 0.1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointBackgroundColor: '#4361ee',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            font: {
-                                family: "'Segoe UI', system-ui, sans-serif"
-                            }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        titleColor: '#333',
-                        bodyColor: '#333',
-                        borderColor: '#4361ee',
-                        borderWidth: 1,
-                        callbacks: {
-                            afterLabel: function(context) {
-                                const index = context.dataIndex;
-                                return progressData[index].test_name;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Уровень знаний (θ)',
-                            font: {
-                                family: "'Segoe UI', system-ui, sans-serif"
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Дата тестирования',
-                            font: {
-                                family: "'Segoe UI', system-ui, sans-serif"
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.1)'
-                        }
-                    }
-                }
-            }
-        });
+      // Основная статистика
+      document.getElementById('statTestName').textContent = data.test_name;
+      document.getElementById('statTotal').textContent = data.total_questions;
+      document.getElementById('statCorrect').textContent = data.correct_answers;
+      document.getElementById('statAccuracy').textContent = data.accuracy;
+      document.getElementById('statTheta').textContent = data.theta;
+      document.getElementById('statError').textContent = data.standard_error;
+      document.getElementById('statLevel').textContent = data.knowledge_level;
+      document.getElementById('statDescription').textContent = data.level_description;
+
+      // Ответы
+      const tableBody = document.getElementById('answersTable');
+      tableBody.innerHTML = '';
+      data.answers.forEach((ans, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${ans.question}</td>
+          <td>${ans.selected || '—'}</td>
+          <td class="${ans.is_correct ? 'correct-answer' : 'wrong-answer'}">
+            ${ans.is_correct ? 'Верно' : 'Ошибка'}
+          </td>
+          <td>${ans.correct}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      new bootstrap.Modal(document.getElementById('testStatsModal')).show();
+    })
+    .catch(err => {
+      console.error("Ошибка загрузки статистики:", err);
+      alert("Не удалось загрузить данные теста.");
     });
+    // Очистка старых ответов
+    const answersContainer = document.getElementById('statAnswers');
+    answersContainer.innerHTML = '';
+
+    if (data.answers && data.answers.length > 0) {
+      data.answers.forEach(ans => {
+        const div = document.createElement('div');
+        div.classList.add('answer-item', ans.is_correct ? 'correct' : 'incorrect');
+        div.innerHTML = `
+          <span class="answer-text">${ans.question_text}</span>
+          ${!ans.is_correct ? `<span class="correct-answer">Правильный: ${ans.correct_answer}</span>` : ''}
+        `;
+        answersContainer.appendChild(div);
+      });
+    }
+
+}
 </script>
-{% endif %}
 {% endblock %}
