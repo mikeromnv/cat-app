@@ -111,3 +111,53 @@ class RegisterForm(forms.ModelForm):
 
         return user
 
+class ProfileUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Users
+        fields = ['username', 'email', 'first_name', 'last_name', 'num_group']
+        labels = {
+            'username': 'Имя пользователя',
+            'email': 'Электронная почта',
+            'first_name': 'Имя',
+            'last_name': 'Фамилия',
+            'num_group': 'Группа',
+        }
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'num_group': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super().__init__(*args, **kwargs)
+
+
+        if self.user.role.role_name != "Студент":
+            self.fields.pop("num_group")
+
+    def clean_email(self):
+        email = self.cleaned_data['email']
+        if Users.objects.exclude(id=self.user.id).filter(email=email).exists():
+            raise forms.ValidationError("Этот email уже используется.")
+        return email
+
+    def clean_username(self):
+        username = self.cleaned_data['username']
+        if Users.objects.exclude(id=self.user.id).filter(username=username).exists():
+            raise forms.ValidationError("Это имя уже занято.")
+        return username
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+
+        if self.user.role.role_name == "Студент":
+            num_group = cleaned_data.get("num_group")
+
+            if not num_group:
+                self.add_error("num_group", "Номер группы обязателен для студентов.")
+
+        return cleaned_data

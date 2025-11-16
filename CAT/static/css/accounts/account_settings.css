@@ -1,0 +1,93 @@
+:root {
+    --sky-blue: #8ecae6ff;
+    --blue-green: #219ebcff;
+    --prussian-blue: #023047ff;
+    --selective-yellow: #ffb703ff;
+    --ut-orange: #fb8500ff;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn .4s ease forwards;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(2,48,71,0.12);
+    transition: all .25s;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(2,48,71,0.18);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--prussian-blue);
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 2px solid var(--sky-blue);
+}
+.form-control:focus {
+    border-color: var(--blue-green);
+    box-shadow: 0 0 5px rgba(33, 158, 188, 0.3);
+}
+
+.btn-primary {
+    background-color: var(--blue-green);
+    border-color: var(--blue-green);
+    border-radius: 10px;
+}
+.btn-primary:hover {
+    background-color: var(--ut-orange);
+    border-color: var(--ut-orange);
+}
+
+.custom-alert {
+    animation: fadeIn 0.4s ease-out, fadeOut 0.4s ease-in 5s forwards;
+    border-radius: 10px;
+}
+
+/* Плавное появление */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Автоматическое исчезновение */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; height: 0; margin: 0; padding: 0; }
+}
+
+
+/* Стили для ошибок полей */
+
+.errorlist {
+    background-color: var(--error-bg);
+    border: 1px solid rgba(230, 57, 70, 0.3);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    list-style: none;
+}
+
+.errorlist li {
+    color: var(--error-red);
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+}
+
+.errorlist li:last-child {
+    margin-bottom: 0;
+}
+
+
+

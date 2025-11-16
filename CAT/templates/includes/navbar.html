@@ -11,6 +11,7 @@
             {% elif user.role and user.role.role_name == "Студент" %}
                 <li><a href="{% url 'student_profile' %}">Профиль</a></li>
             {% endif %}
+                <li><a href="{% url 'account_settings' %}">Настройки</a></li>
         {% endif %}
     </ul>
 

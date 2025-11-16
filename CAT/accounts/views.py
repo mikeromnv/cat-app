@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
 
-from .forms import RegisterForm
+from .forms import RegisterForm, ProfileUpdateForm
 from .models import Users, UserRole
 
 # ИСПРАВЛЕННЫЕ ИМПОРТЫ - убрать ..
@@ -165,3 +165,21 @@ def student_profile(request):
             'testing_available': False
         }
         return render(request, 'accounts/student_profile.html', context)
+
+
+@login_required
+def account_settings(request):
+    user = request.user
+
+    if request.method == "POST":
+        form = ProfileUpdateForm(request.POST, instance=user, user=user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Данные успешно обновлены!")
+            return redirect("account_settings")
+        else:
+            messages.error(request, "Проверьте правильность введённых данных.")
+    else:
+        form = ProfileUpdateForm(instance=user, user=user)
+
+    return render(request, "accounts/account_settings.html", {"form": form})

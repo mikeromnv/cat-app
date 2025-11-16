@@ -129,7 +129,7 @@ function openTestStats(sessionId) {
     .then(data => {
       if (!data.success) throw new Error("Ошибка данных");
 
-      // Основная статистика
+      // --- Основная статистика ---
       document.getElementById('statTestName').textContent = data.test_name;
       document.getElementById('statTotal').textContent = data.total_questions;
       document.getElementById('statCorrect').textContent = data.correct_answers;
@@ -139,9 +139,10 @@ function openTestStats(sessionId) {
       document.getElementById('statLevel').textContent = data.knowledge_level;
       document.getElementById('statDescription').textContent = data.level_description;
 
-      // Ответы
+      // --- Таблица ответов ---
       const tableBody = document.getElementById('answersTable');
       tableBody.innerHTML = '';
+
       data.answers.forEach((ans, idx) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -156,28 +157,30 @@ function openTestStats(sessionId) {
         tableBody.appendChild(tr);
       });
 
+      // --- Answer-list (красивые карточки ответов) ---
+      const answersContainer = document.getElementById('statAnswers');
+      answersContainer.innerHTML = '';
+
+      if (data.answers && data.answers.length > 0) {
+        data.answers.forEach(ans => {
+          const div = document.createElement('div');
+          div.classList.add('answer-item', ans.is_correct ? 'correct' : 'incorrect');
+          div.innerHTML = `
+            <span class="answer-text">${ans.question}</span>
+            ${!ans.is_correct ? `<span class="correct-answer">Правильный: ${ans.correct}</span>` : ''}
+          `;
+          answersContainer.appendChild(div);
+        });
+      }
+
+      // --- Показ модального окна ---
       new bootstrap.Modal(document.getElementById('testStatsModal')).show();
     })
     .catch(err => {
       console.error("Ошибка загрузки статистики:", err);
       alert("Не удалось загрузить данные теста.");
     });
-    // Очистка старых ответов
-    const answersContainer = document.getElementById('statAnswers');
-    answersContainer.innerHTML = '';
-
-    if (data.answers && data.answers.length > 0) {
-      data.answers.forEach(ans => {
-        const div = document.createElement('div');
-        div.classList.add('answer-item', ans.is_correct ? 'correct' : 'incorrect');
-        div.innerHTML = `
-          <span class="answer-text">${ans.question_text}</span>
-          ${!ans.is_correct ? `<span class="correct-answer">Правильный: ${ans.correct_answer}</span>` : ''}
-        `;
-        answersContainer.appendChild(div);
-      });
-    }
-
 }
 </script>
+
 {% endblock %}
