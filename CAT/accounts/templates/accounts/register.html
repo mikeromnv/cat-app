@@ -14,8 +14,6 @@
 
         <form method="post" novalidate id="registerForm" class="auth-form">
             {% csrf_token %}
-
-            <!-- username -->
             <div class="form-group">
                 <label class="form-label">{{ form.username.label }}</label>
                 {{ form.username }}
@@ -23,8 +21,6 @@
                     <div class="text-danger small mt-1">{{ form.username.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
-            <!-- email -->
             <div class="form-group">
                 <label class="form-label">{{ form.email.label }}</label>
                 {{ form.email }}
@@ -32,8 +28,6 @@
                     <div class="text-danger small mt-1">{{ form.email.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
-            <!-- first_name -->
             <div class="form-group">
                 <label class="form-label">{{ form.first_name.label }}</label>
                 {{ form.first_name }}
@@ -41,8 +35,6 @@
                     <div class="text-danger small mt-1">{{ form.first_name.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
-            <!-- last_name -->
             <div class="form-group">
                 <label class="form-label">{{ form.last_name.label }}</label>
                 {{ form.last_name }}
@@ -50,8 +42,6 @@
                     <div class="text-danger small mt-1">{{ form.last_name.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
-            <!-- role -->
             <div class="form-group">
                 <label class="form-label">{{ form.role.label }}</label>
                 {{ form.role }}
@@ -59,8 +49,6 @@
                     <div class="text-danger small mt-1">{{ form.role.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
-            <!-- group (initially hidden) -->
             <div id="groupField" style="display: none;">
                 <div class="form-group">
                     <label class="form-label">{{ form.group_number.label }}</label>
@@ -70,8 +58,6 @@
                     {% endif %}
                 </div>
             </div>
-
-            <!-- password -->
             <div class="form-group">
                 <label class="form-label">{{ form.password.label }}</label>
                 {{ form.password }}
@@ -79,8 +65,6 @@
                     <div class="text-danger small mt-1">{{ form.password.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
-            <!-- confirm_password -->
             <div class="form-group">
                 <label class="form-label">{{ form.confirm_password.label }}</label>
                 {{ form.confirm_password }}
@@ -88,7 +72,6 @@
                     <div class="text-danger small mt-1">{{ form.confirm_password.errors.as_text|cut:"*" }}</div>
                 {% endif %}
             </div>
-
             <button type="submit" class="btn btn-success w-100 auth-btn">Зарегистрироваться</button>
         </form>
 

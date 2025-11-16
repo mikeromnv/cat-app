@@ -1,0 +1,72 @@
+:root {
+    --sky-blue: #8ecae6;
+    --blue-green: #219ebc;
+    --prussian-blue: #023047;
+    --selective-yellow: #ffb703;
+    --ut-orange: #fb8500;
+}
+
+/* Карточка */
+.result-card {
+    border-radius: 14px;
+    border: 1px solid #e6e6e6;
+    overflow: hidden;
+    background: #fff;
+}
+
+/* Хедер */
+.result-header {
+    background: var(--blue-green);
+    color: #fff;
+    padding: 24px;
+}
+
+/* Общие блоки */
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--prussian-blue);
+}
+
+/* Метрики */
+.metric-card {
+    padding: 18px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fafafa;
+}
+
+.metric-value {
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.metric-label {
+    font-size: 14px;
+    color: #777;
+}
+
+/* История ответов */
+.answer-item {
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #e5e5e5;
+    background: #fff;
+}
+
+.answer-item.correct {
+    border-color: #44aa66;
+    background: rgba(68, 170, 102, 0.08);
+}
+
+.answer-item.incorrect {
+    border-color: #cc5555;
+    background: rgba(204, 85, 85, 0.07);
+}
+
+/* Футер */
+.result-footer {
+    background: #f8f9fa;
+    padding: 20px;
+    border-top: 1px solid #e6e6e6;
+}

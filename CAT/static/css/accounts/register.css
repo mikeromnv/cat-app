@@ -9,12 +9,10 @@ body {
     display: block;
 }
 
-/* Скрываем сайдбар */
 .sidebar {
     display: none;
 }
 
-/* Расширяем контент на всю ширину */
 .content {
     margin-left: 0;
     width: 100%;

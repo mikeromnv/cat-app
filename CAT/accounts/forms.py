@@ -2,10 +2,6 @@ from django import forms
 from django.utils import timezone
 from .models import Users, UserRole
 
-from django import forms
-from django.utils import timezone
-from .models import Users, UserRole
-
 
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(

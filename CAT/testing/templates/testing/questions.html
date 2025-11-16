@@ -75,7 +75,6 @@
 
 <!-- Модальное окно добавления вопроса -->
 <div class="modal fade" id="addQuestionModal" tabindex="-1" aria-labelledby="addQuestionModalLabel" aria-hidden="true">
-
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <form id="addQuestionForm" method="post" action="{% url 'add_question' %}">
@@ -83,54 +82,46 @@
         <input type="hidden" name="question_id" value="{{ edit_question.question_id|default:'' }}">
 
         <div class="modal-header">
-          <h5 class="modal-title fw-bold" id="addQuestionModalLabel">Добавить новый вопрос</h5>
+          <h5 class="modal-title fw-bold" id="addQuestionModalLabel">
+            {% if edit_question %}Редактировать вопрос{% else %}Добавить новый вопрос{% endif %}
+          </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body fade-in">
           {% for field in form %}
-            <div class="mb-3">
-              <label class="form-label">{{ field.label }}</label>
-              {{ field }}
-              {% if field.errors %}
-                <div class="text-danger small mt-1">{{ field.errors.as_text|cut:"*" }}</div>
-              {% endif %}
-            </div>
+          <div class="mb-3">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger small mt-1">{{ field.errors.as_text|cut:"*" }}</div>
+            {% endif %}
+          </div>
           {% endfor %}
 
           <hr>
           <h6 class="fw-bold">Варианты ответов</h6>
           <div id="answers-container">
-              {% if edit_question %}
-                {% for ans in edit_question.answers_set.all %}
-                  <div class="input-group mb-2 answer-row">
-                    <div class="input-group-text">
-                      <input type="radio" name="correct_answer" value="{{ forloop.counter0 }}" {% if ans.is_correct %}checked{% endif %} required>
-                    </div>
-                    <input type="text" name="answer_text[]" class="form-control" value="{{ ans.answer_text }}" required>
-                    <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
-                  </div>
-                {% endfor %}
-              {% else %}
-                <div class="input-group mb-2 answer-row">
-                  <div class="input-group-text">
-                    <input type="radio" name="correct_answer" value="0" required>
-                  </div>
-                  <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
-                  <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
-                </div>
-              {% endif %}
-          </div>
             {% if edit_question %}
-            <!-- Скрипт открытия модалки нужно поставить здесь, после всей модалки -->
-            <script>
-              document.addEventListener("DOMContentLoaded", function() {
-                  var myModal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
-                  myModal.show();
-              });
-            </script>
+              {% for ans in edit_question.answers_set.all %}
+              <div class="input-group mb-2 answer-row">
+                <div class="input-group-text">
+                  <input type="radio" name="correct_answer" value="{{ forloop.counter0 }}" {% if ans.is_correct %}checked{% endif %} required>
+                </div>
+                <input type="text" name="answer_text[]" class="form-control" value="{{ ans.answer_text }}" required>
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="input-group mb-2 answer-row">
+                <div class="input-group-text">
+                  <input type="radio" name="correct_answer" value="0" required>
+                </div>
+                <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
+                <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+              </div>
             {% endif %}
-
+          </div>
 
           <button type="button" id="addAnswerBtn" class="btn btn-outline-secondary btn-sm mt-2">
             + Добавить вариант
@@ -139,13 +130,24 @@
 
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">Сохранить</button>
-          <button type="button" class="btn btn-secondary"
-                data-bs-dismiss="modal"
-                onclick="window.location='?';">
-                Отмена
-        </button>
-
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                  onclick="window.location='?';">Отмена</button>
         </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if edit_question %}
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      var myModal = new bootstrap.Modal(document.getElementById('addQuestionModal'));
+      myModal.show();
+  });
+</script>
+{% endif %}
+
+
       </form>
     </div>
   </div>

@@ -1,24 +1,19 @@
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.hashers import make_password
-from django.db import IntegrityError
 from django.db.models import Avg
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.utils import timezone
-
 from .forms import RegisterForm, ProfileUpdateForm
-from .models import Users, UserRole
-
+from testing.models import TestSessions, UserAnswers, Topic
+# TESTING_AVAILABLE = True
 # ИСПРАВЛЕННЫЕ ИМПОРТЫ - убрать ..
-try:
-    from testing.models import TestSessions, UserAnswers, Topic
-
-    TESTING_AVAILABLE = True
-except ImportError as e:
-    print(f"Testing models import error: {e}")
-    TESTING_AVAILABLE = False
-
+# try:
+#     from testing.models import TestSessions, UserAnswers, Topic
+#
+#     TESTING_AVAILABLE = True
+# except ImportError as e:
+#     print(f"Testing models import error: {e}")
+#     TESTING_AVAILABLE = False
 
 def register_view(request):
     if request.method == 'POST':
@@ -40,7 +35,7 @@ def login_view(request):
     if request.method == 'POST':
         email = request.POST.get('email')
         password = request.POST.get('password')
-        email_value = email  # сохраняем для формы
+        email_value = email
 
         user = authenticate(request, email=email, password=password)
         if user is not None:
@@ -51,35 +46,31 @@ def login_view(request):
 
     return render(request, 'accounts/login.html', {'email_value': email_value})
 
-
 def logout_view(request):
     logout(request)
     return redirect('login')
 
-
 @login_required
 def student_profile(request):
-    """Профиль студента с статистикой"""
     user = request.user
 
-    # Проверяем, что пользователь - студент
     if not hasattr(user, 'role') or not user.role or user.role.role_name != 'Студент':
         messages.error(request, 'Эта страница доступна только студентам.')
         return redirect('index')
 
     # Если testing модели недоступны
-    if not TESTING_AVAILABLE:
-        context = {
-            'user': user,
-            'total_tests': 0,
-            'total_questions': 0,
-            'total_correct': 0,
-            'overall_accuracy': 0,
-            'topics_progress': [],
-            'recent_sessions': [],
-            'testing_available': False
-        }
-        return render(request, 'accounts/student_profile.html', context)
+    # if not TESTING_AVAILABLE:
+    #     context = {
+    #         'user': user,
+    #         'total_tests': 0,
+    #         'total_questions': 0,
+    #         'total_correct': 0,
+    #         'overall_accuracy': 0,
+    #         'topics_progress': [],
+    #         'recent_sessions': [],
+    #         'testing_available': False
+    #     }
+    #     return render(request, 'accounts/student_profile.html', context)
 
     try:
         # Статистика по тестированиям
@@ -136,7 +127,7 @@ def student_profile(request):
                 })
 
         # Последние тестирования
-        recent_sessions = test_sessions.order_by('-end_time')[:5]
+        recent_sessions = test_sessions.order_by('-end_time')
 
         context = {
             'user': user,
@@ -145,15 +136,13 @@ def student_profile(request):
             'total_correct': total_correct,
             'overall_accuracy': round(overall_accuracy, 1),
             'topics_progress': topics_progress,
-            'recent_sessions': recent_sessions,
-            'testing_available': True
+            'recent_sessions': recent_sessions
         }
 
         return render(request, 'accounts/student_profile.html', context)
 
     except Exception as e:
         messages.error(request, f'Ошибка при загрузке профиля: {str(e)}')
-        # Возвращаем базовый контекст при ошибке
         context = {
             'user': user,
             'total_tests': 0,
@@ -161,8 +150,7 @@ def student_profile(request):
             'total_correct': 0,
             'overall_accuracy': 0,
             'topics_progress': [],
-            'recent_sessions': [],
-            'testing_available': False
+            'recent_sessions': []
         }
         return render(request, 'accounts/student_profile.html', context)
 

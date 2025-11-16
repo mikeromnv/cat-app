@@ -1,0 +1,51 @@
+.fade-in {
+    animation: fadeIn 0.4s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card {
+    border-radius: 14px;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.list-group-item {
+    border-radius: 10px;
+    margin-bottom: 6px;
+    padding: 14px 18px;
+}
+
+.list-group-item:hover {
+    background: #f5f9ff;
+    transition: 0.2s;
+}
+
+.btn-lg, .btn {
+    border-radius: 10px;
+}
+
+.btn-primary, .btn-success {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+
+.btn-primary:hover, .btn-success:hover, .btn-outline-primary:hover, .btn-outline-success:hover {
+    transform: translateY(-2px);
+    transition: 0.15s;
+}
+
+.form-label {
+    font-size: 1.05rem;
+}
+
+.alert {
+    border-radius: 10px;
+}
+
+.d-flex.gap-2.flex-wrap > .btn {
+    min-width: 150px;
+}

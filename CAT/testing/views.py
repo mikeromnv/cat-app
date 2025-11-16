@@ -1,30 +1,19 @@
-import json
-
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import JsonResponse, HttpResponseForbidden
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
 from django.utils import timezone
-from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.http import require_http_methods
 
 from .cat_algorithm import CATAlgorithm3PL
-from .forms import QuestionForm
-from .models import Questions, Answers, TestQuestions, TestSessions, UserAnswers, Status
-
-# Create your views here.
+from .models import TestQuestions, TestSessions, UserAnswers, Status
 
 from django.shortcuts import render
-from .models import Test, Questions, Topic
+from .models import Test, Topic
 
 
 def index(request):
     tests = Test.objects.all()  # список всех тестов
-    # authors = Users.objects.filter(role_id=2)
     return render(request, 'testing/index.html', {'tests': tests})
 
 @login_required(login_url='login')
@@ -41,7 +30,6 @@ def questions_view(request):
 
     topics = Topic.objects.all()
 
-    edit_question = None
     edit_id = request.GET.get('edit_id')
     if edit_id:
         edit_question = get_object_or_404(Questions, pk=edit_id)
@@ -57,9 +45,6 @@ def questions_view(request):
     }
     return render(request, 'testing/questions.html', context)
 
-
-
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, get_object_or_404
@@ -70,7 +55,6 @@ from .forms import QuestionForm
 def add_question(request):
     user = request.user
 
-    # Проверка роли
     if not hasattr(user, 'role') or user.role.role_name != 'Преподаватель':
         messages.error(request, 'Доступ только для преподавателей.')
         return redirect('index')
@@ -84,7 +68,7 @@ def add_question(request):
         if form.is_valid() and answers_texts and correct_index is not None:
             if question_id:  # редактирование существующего вопроса
                 question = get_object_or_404(Questions, pk=question_id)
-                # Обновляем поля вопроса
+
                 question.text_question = form.cleaned_data['text_question']
                 question.topic = form.cleaned_data['topic']
                 question.difficulty = form.cleaned_data['difficulty']
@@ -92,14 +76,13 @@ def add_question(request):
                 question.guessing = form.cleaned_data['guessing']
                 question.save()
 
-                # Удаляем старые ответы, чтобы создать новые
+
                 Answers.objects.filter(question=question).delete()
-            else:  # добавление нового вопроса
+            else:
                 question = form.save(commit=False)
                 question.author = user
                 question.save()
 
-            # Создаём ответы
             answers = []
             for idx, text in enumerate(answers_texts):
                 answer = Answers.objects.create(
@@ -110,7 +93,6 @@ def add_question(request):
                 )
                 answers.append(answer)
 
-            # Устанавливаем правильный ответ
             question.correct_answer = answers[int(correct_index)]
             question.save()
 
@@ -124,10 +106,6 @@ def add_question(request):
             messages.error(request, 'Ошибка при сохранении вопроса. Проверьте форму и ответы.')
 
     return redirect('questions')
-
-
-
-
 
 @login_required
 @require_http_methods(["DELETE"])
@@ -145,12 +123,7 @@ def delete_question(request, question_id):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
-
-
-
-
 ##############################
-
 @login_required
 def create_test(request):
     if request.method == 'POST':
@@ -160,16 +133,13 @@ def create_test(request):
         if test_name and topic_id:
             topic = get_object_or_404(Topic, pk=topic_id)
 
-            # Создаем тест
             test = Test.objects.create(
                 test_name=test_name,
                 topic=topic,
                 author=request.user,
                 num_of_questions=0
             )
-
             messages.success(request, f'Тест "{test_name}" успешно создан!')
-            # Сразу перенаправляем на редактирование теста
             return redirect('edit_test', test_id=test.test_id)
         else:
             messages.error(request, 'Заполните все обязательные поля.')
@@ -184,15 +154,12 @@ def create_test(request):
 def edit_test(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
 
-    # Проверяем, что пользователь - автор теста
     if test.author != request.user:
         messages.error(request, 'Вы не можете редактировать этот тест.')
         return redirect('index')
 
-    # Получаем вопросы по теме теста
     questions = Questions.objects.filter(topic=test.topic)
 
-    # Получаем вопросы уже добавленные в тест
     test_questions = TestQuestions.objects.filter(test=test).select_related('question')
 
     # Обработка создания нового вопроса
@@ -202,10 +169,10 @@ def edit_test(request, test_id):
         correct_answer_index = request.POST.get('correct_answer')
 
         if form.is_valid() and answers:
-            with transaction.atomic():
+            with transaction.atomic(): #Сгруппировать серию операций с базой данных в одну транзакцию.
                 question = form.save(commit=False)
                 question.author = request.user
-                question.topic = test.topic  # Автоматически устанавливаем тему теста
+                question.topic = test.topic
                 question.save()
 
                 for i, answer_text in enumerate(answers):
@@ -218,7 +185,6 @@ def edit_test(request, test_id):
                         answer_number=i + 1
                     )
 
-                # Автоматически добавляем новый вопрос в тест
                 TestQuestions.objects.get_or_create(test=test, question=question)
                 test.num_of_questions = TestQuestions.objects.filter(test=test).count()
                 test.save()
@@ -237,21 +203,17 @@ def edit_test(request, test_id):
         'form': form
     })
 
-
 @login_required
 def add_question_to_test(request, test_id, question_id):
     test = get_object_or_404(Test, pk=test_id)
     question = get_object_or_404(Questions, pk=question_id)
 
-    # Проверяем права доступа
     if test.author != request.user:
         messages.error(request, 'Вы не можете редактировать этот тест.')
         return redirect('index')
 
-    # Добавляем вопрос в тест
     TestQuestions.objects.get_or_create(test=test, question=question)
 
-    # Обновляем количество вопросов
     test.num_of_questions = TestQuestions.objects.filter(test=test).count()
     test.save()
 
@@ -268,10 +230,8 @@ def remove_question_from_test(request, test_id, question_id):
         messages.error(request, 'Вы не можете редактировать этот тест.')
         return redirect('index')
 
-    # Удаляем вопрос из теста
     TestQuestions.objects.filter(test=test, question=question).delete()
 
-    # Обновляем количество вопросов
     test.num_of_questions = TestQuestions.objects.filter(test=test).count()
     test.save()
 
@@ -281,10 +241,8 @@ def remove_question_from_test(request, test_id, question_id):
 ###############################################################
 @login_required
 def start_adaptive_test(request, test_id):
-    """Начало адаптивного тестирования"""
     test = get_object_or_404(Test, test_id=test_id)
 
-    # Проверяем активную сессию
     active_session = TestSessions.objects.filter(
         user=request.user,
         test=test,
@@ -294,11 +252,10 @@ def start_adaptive_test(request, test_id):
     if active_session:
         return redirect('take_adaptive_test', session_id=active_session.session_id)
 
-    # Получаем или создаем статусы
     in_progress_status, _ = Status.objects.get_or_create(status_name='in_progress')
     completed_status, _ = Status.objects.get_or_create(status_name='completed')
 
-    # Создаем сессию тестирования
+    # создание сессия тестирования
     with transaction.atomic():
         session = TestSessions.objects.create(
             user=request.user,
@@ -308,8 +265,7 @@ def start_adaptive_test(request, test_id):
             status=in_progress_status,
             start_time=timezone.now()
         )
-
-        # Выбираем первый вопрос
+        #первый вопрос
         available_questions = Questions.objects.filter(topic=test.topic)
         if available_questions.exists():
             cat = CATAlgorithm3PL()
@@ -322,23 +278,20 @@ def start_adaptive_test(request, test_id):
 
 @login_required
 def take_adaptive_test(request, session_id):
-    """Страница прохождения адаптивного теста"""
     session = get_object_or_404(TestSessions, session_id=session_id, user=request.user)
 
-    # Проверяем статус сессии
     if session.status.status_name == 'completed':
         return redirect('adaptive_test_results', session_id=session_id)
 
     current_question = session.next_question
     if not current_question:
-        # Завершаем тест если нет следующего вопроса
+        # конец теста если нет следующего вопроса
         completed_status, _ = Status.objects.get_or_create(status_name='completed')
         session.status = completed_status
         session.end_time = timezone.now()
         session.save()
         return redirect('adaptive_test_results', session_id=session_id)
 
-    # Получаем варианты ответов
     answers = Answers.objects.filter(question=current_question).order_by('answer_number')
 
     if request.method == 'POST':
@@ -355,7 +308,6 @@ def take_adaptive_test(request, session_id):
 
 
 def handle_test_response(request, session, current_question, answers):
-    """Обработка ответа пользователя"""
     selected_option = request.POST.get('selected_option')
 
     if not selected_option:
@@ -366,12 +318,10 @@ def handle_test_response(request, session, current_question, answers):
         selected_option = int(selected_option)
         selected_answer = answers.get(answer_number=selected_option)
 
-        # Проверяем правильность ответа
         correct_answer = answers.filter(is_correct=True).first()
         is_correct = (selected_answer == correct_answer)
 
         with transaction.atomic():
-            # Сохраняем ответ пользователя
             user_answer = UserAnswers.objects.create(
                 session=session,
                 test=session.test,
@@ -382,12 +332,12 @@ def handle_test_response(request, session, current_question, answers):
                 answered_at=timezone.now()
             )
 
-            # Получаем историю для пересчета theta
+            # пересчет theta
             user_answers = UserAnswers.objects.filter(session=session).select_related('question')
             response_history = [ua.is_correct for ua in user_answers]
             question_history = [ua.question for ua in user_answers]
 
-            # Пересчитываем оценку способностей
+            # пересчитываем оценку способностей
             cat = CATAlgorithm3PL()
             current_theta = float(session.current_ability_estimate) if session.current_ability_estimate else 0.0
 
@@ -397,7 +347,7 @@ def handle_test_response(request, session, current_question, answers):
                 current_theta
             )
 
-            # Рассчитываем вероятность правильного ответа для этого вопроса
+            # вероятность правильного ответа для этого вопроса
             a = float(current_question.discrimination) if current_question.discrimination else 1.0
             b = float(current_question.difficulty) if current_question.difficulty else 0.0
             c = float(current_question.guessing) if current_question.guessing else 0.25
@@ -409,11 +359,9 @@ def handle_test_response(request, session, current_question, answers):
             user_answer.probability_of_correct = probability
             user_answer.save()
 
-            # Обновляем сессию
             session.current_ability_estimate = new_theta
             session.standard_error = se
 
-            # Проверяем критерий остановки
             theta_history = list(UserAnswers.objects.filter(
                 session=session
             ).exclude(ability_after_answer=None).values_list(
@@ -434,7 +382,7 @@ def handle_test_response(request, session, current_question, answers):
                 session.save()
                 return redirect('adaptive_test_results', session_id=session.session_id)
             else:
-                # Выбираем следующий вопрос
+                # следующий вопрос
                 available_questions = Questions.objects.filter(topic=session.test.topic)
                 next_question = cat.select_next_question(
                     new_theta,
@@ -453,15 +401,12 @@ def handle_test_response(request, session, current_question, answers):
 
 @login_required
 def adaptive_test_results(request, session_id):
-    """Результаты адаптивного тестирования"""
     session = get_object_or_404(TestSessions, session_id=session_id, user=request.user)
 
-    # Проверяем, что сессия завершена
     if session.status.status_name != 'completed':
         messages.warning(request, 'Тест еще не завершен!')
         return redirect('take_adaptive_test', session_id=session_id)
 
-    # Статистика
     user_answers = UserAnswers.objects.filter(session=session).select_related(
         'question',
         'selected_answer',
@@ -472,7 +417,6 @@ def adaptive_test_results(request, session_id):
 
     accuracy = (correct_answers / total_questions * 100) if total_questions > 0 else 0
 
-    # Уровень знаний по шкале theta
     theta = float(session.current_ability_estimate) if session.current_ability_estimate else 0.0
     standard_error = float(session.standard_error) if session.standard_error else 1.0
 
@@ -493,7 +437,6 @@ def adaptive_test_results(request, session_id):
         knowledge_level = "Новичок"
         level_description = "Требуется изучение основ"
 
-    # Рассчитываем время прохождения
     if session.end_time and session.start_time:
         duration = session.end_time - session.start_time
         duration_minutes = duration.total_seconds() / 60
@@ -519,10 +462,7 @@ def adaptive_test_results(request, session_id):
 
 @login_required
 def adaptive_test_list(request):
-    """Список тестов для адаптивного тестирования"""
     tests = Test.objects.filter(testquestions__isnull=False).distinct()
-
-    # Для преподавателей - их тесты, для студентов - все доступные
     if request.user.role.role_name == 'Преподаватель':
         tests = tests.filter(author=request.user)
 
@@ -581,22 +521,18 @@ def delete_test(request, test_id):
 def view_test(request, test_id):
     test = get_object_or_404(Test, test_id=test_id)
 
-    # Проверка на права доступа: только автор может смотреть
     if test.author != request.user:
         return HttpResponseForbidden("У вас нет доступа к этому тесту")
 
-    # Вопросы теста
     questions = TestQuestions.objects.filter(test=test).select_related("question")
 
-    # Все завершённые прохождения теста
     sessions = (
         TestSessions.objects
         .filter(test=test)
-        .exclude(end_time=None)         # считаем завершённым, если end_time заполнено
+        .exclude(end_time=None)
         .select_related("user", "status")
     )
 
-    # Формируем данные о результатах
     session_results = []
 
     for s in sessions:

@@ -12,7 +12,7 @@ body {
     color: var(--prussian-blue);
 }
 
-/* Плавное появление страницы */
+/*  -------- Плавное появление страницы --------  */
 .fade-in {
     opacity: 0;
     animation: fadeIn 0.5s ease-in forwards;
@@ -22,7 +22,6 @@ body {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Заголовки */
 h2 {
     color: var(--prussian-blue);
 }
@@ -30,7 +29,6 @@ h2 {
     color: #6c757d !important;
 }
 
-/* Карточки */
 .card {
     border: none;
     border-radius: 10px;
@@ -42,7 +40,6 @@ h2 {
     box-shadow: 0 4px 12px rgba(2, 48, 71, 0.15);
 }
 
-/* Заголовок карточки */
 .card-header {
     background-color: var(--sky-blue);
     border-radius: 10px 10px 0 0;
@@ -50,7 +47,6 @@ h2 {
     color: var(--prussian-blue);
 }
 
-/* Элементы списков */
 .list-group-item {
     border: none;
     border-bottom: 1px solid rgba(2, 48, 71, 0.08);
@@ -64,7 +60,7 @@ h2 {
     background-color: rgba(142, 202, 230, 0.15);
 }
 
-/* Основная статистика */
+/* --------  Основная статистика --------  */
 .row .border {
     border: 2px solid var(--sky-blue) !important;
     border-radius: 10px;
@@ -81,13 +77,11 @@ h2 {
     font-weight: 600;
 }
 
-/* Бейдж уровня θ */
 .badge {
     background-color: var(--blue-green) !important;
     font-weight: 500;
 }
 
-/* Ссылки и кнопки */
 a {
     color: var(--blue-green);
     text-decoration: none;
@@ -131,7 +125,6 @@ a:hover {
     filter: invert(1);
 }
 
-/* Тело модалки */
 .modal-body {
     background-color: #fdfdfd;
     padding: 1.5rem;
@@ -164,7 +157,6 @@ a:hover {
     box-shadow: 0 3px 8px rgba(2, 48, 71, 0.1);
 }
 
-/* Метка правильности */
 .answer-item.correct {
     border-left: 5px solid #21bc81;
     background-color: rgba(142, 230, 196, 15%);
@@ -175,7 +167,6 @@ a:hover {
     background-color: rgba(251, 133, 0, 0.08);
 }
 
-/* Текст внутри */
 .answer-text {
     flex-grow: 1;
     font-size: 0.95rem;
@@ -187,15 +178,11 @@ a:hover {
     color: var(--ut-orange);
 }
 
-/* Подпись уровня знаний */
 #statLevel {
     color: var(--selective-yellow);
     font-weight: 600;
 }
 
-
-
-/* Адаптивность */
 @media (max-width: 768px) {
     .row .col-md-3 {
         flex: 0 0 50%;

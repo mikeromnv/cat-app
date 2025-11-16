@@ -1,0 +1,84 @@
+/* Общий стиль */
+.test-card {
+    border-radius: 12px;
+}
+
+.test-header {
+    background: linear-gradient(270deg, #ffc107, #dc3545);
+    color: white;
+    border-radius: 12px 12px 0 0;
+}
+
+/* Прогресс */
+.progress-wrapper {
+    height: 18px;
+    border-radius: 10px;
+}
+
+.progress-bar {
+    background-color: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-weight: 600;
+    border-radius: 10px;
+}
+
+/* Вопрос */
+.icon-box {
+    width: 42px;
+    height: 42px;
+    background: rgba(102,126,234,0.15);
+    color: #667eea;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+}
+
+/* Варианты ответов */
+.answer-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.answer-option:hover {
+    background: #f7f7ff;
+    border-color: #667eea;
+}
+
+.answer-option input {
+    width: 1.1em;
+    height: 1.1em;
+}
+
+/* Статистика */
+.stat-block {
+    padding: 12px 0;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 13px;
+    opacity: 0.7;
+}
+
+/* Нижние карточки */
+.info-box {
+    background: rgba(255, 193, 7, 0.15);
+    border: none;
+}
+
+.time-box {
+    background: rgba(102, 126, 234, 0.15);
+    border: none;
+}

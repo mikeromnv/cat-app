@@ -13,7 +13,7 @@
   <h2 class="fw-bold mb-3"><i class="bi bi-person-circle me-2"></i>Профиль студента</h2>
   <p class="fs-5 mb-4 text-muted">{{ user.full_name|default:user.username }}</p>
 
-  <!-- Основная статистика -->
+  <!-- кратко статистика -->
   <div class="row text-center mb-4">
     <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ total_tests }}</h4><p class="mb-0">Пройдено тестов</p></div></div>
     <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ total_questions }}</h4><p class="mb-0">Всего вопросов</p></div></div>
@@ -21,7 +21,7 @@
     <div class="col-md-3 mb-2"><div class="p-3 border rounded"><h4>{{ overall_accuracy }}%</h4><p class="mb-0">Точность</p></div></div>
   </div>
 
-  <!-- Прогресс по темам -->
+  <!-- результаты по темам -->
   <div class="card mb-4">
     <div class="card-header"><strong>Прогресс по темам</strong></div>
     <div class="card-body">
@@ -40,7 +40,7 @@
     </div>
   </div>
 
-  <!-- Последние тесты -->
+  <!-- результаты тестов -->
   <div class="card">
     <div class="card-header"><strong>Последние тестирования</strong></div>
     <div class="card-body">
@@ -62,10 +62,7 @@
                         onclick="openTestStats('{{ session.session_id }}')">
                         Смотреть статистику
                       </button>
-
                 </div>
-
-
             </li>
           {% endfor %}
         </ul>
@@ -76,7 +73,7 @@
   </div>
 </div>
 
-<!-- Модальное окно -->
+<!-- модальное окно для статистики отедельного теста -->
 <div class="modal fade" id="testStatsModal" tabindex="-1" aria-labelledby="testStatsLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-scrollable">
     <div class="modal-content">
@@ -157,7 +154,7 @@ function openTestStats(sessionId) {
         tableBody.appendChild(tr);
       });
 
-      // --- Answer-list (красивые карточки ответов) ---
+      // --- Answer-list (карточки ответов) ---
       const answersContainer = document.getElementById('statAnswers');
       answersContainer.innerHTML = '';
 

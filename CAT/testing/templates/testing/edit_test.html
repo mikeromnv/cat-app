@@ -1,92 +1,77 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Редактирование теста: {{ test.name }}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="bg-light">
 
-<div class="container mt-4">
+{% block title %}Редактирование теста: {{ test.test_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/testing/edit_test.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5 fade-in" style="max-width: 1000px;">
+
     {% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
+    {% endfor %}
     {% endif %}
 
-    <div class="card">
-        <div class="card-header">
-            <h4>Редактирование теста: {{ test.name }}</h4>
-            <p class="mb-0">Тема: {{ test.topic.topic_name }}</p>
-            <p class="mb-0">Количество вопросов: {{ test.num_of_questions }}</p>
-        </div>
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4 fw-bold">Редактирование теста: {{ test.test_name }}</h2>
+            <p class="text-center text-muted mb-4">Тема: {{ test.topic.topic_name }} | Количество вопросов: {{ test.num_of_questions }}</p>
 
-        <div class="card-body">
             <div class="row">
                 <!-- Доступные вопросы -->
-                <div class="col-md-6">
+                <div class="col-md-6 mb-4">
                     <h5>Доступные вопросы</h5>
                     <div class="list-group">
                         {% for question in questions %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ question.text_question|truncatewords:10 }}</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        Сложность: {{ question.difficulty }} |
-                                        Автор: {{ question.author.username }}
-                                    </small>
-                                </div>
-                                <a href="{% url 'add_question_to_test' test_id=test.test_id question_id=question.question_id %}"
-                                   class="btn btn-sm btn-outline-success">
-                                    Добавить
-                                </a>
+                        <div class="list-group-item d-flex justify-content-between align-items-center fade-in">
+                            <div>
+                                <strong>{{ question.text_question|truncatewords:10 }}</strong><br>
+                                <small class="text-muted">
+                                    Сложность: {{ question.difficulty }} | Автор: {{ question.author.username }}
+                                </small>
                             </div>
+                            <a href="{% url 'add_question_to_test' test_id=test.test_id question_id=question.question_id %}"
+                               class="btn btn-sm btn-outline-success">Добавить</a>
+                        </div>
                         {% empty %}
-                            <div class="list-group-item text-muted">
-                                Нет доступных вопросов по этой теме.
-                            </div>
+                        <div class="list-group-item text-muted">Нет доступных вопросов по этой теме.</div>
                         {% endfor %}
                     </div>
                 </div>
 
                 <!-- Вопросы в тесте -->
-                <div class="col-md-6">
+                <div class="col-md-6 mb-4">
                     <h5>Вопросы в тесте ({{ test_questions.count }})</h5>
                     <div class="list-group">
                         {% for test_question in test_questions %}
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <strong>{{ test_question.question.text_question|truncatewords:10 }}</strong>
-                                    <br>
-                                    <small class="text-muted">
-                                        Сложность: {{ test_question.question.difficulty }}
-                                    </small>
-                                </div>
-                                <a href="{% url 'remove_question_from_test' test_id=test.test_id question_id=test_question.question.question_id %}"
-                                   class="btn btn-sm btn-outline-danger">
-                                    Удалить
-                                </a>
+                        <div class="list-group-item d-flex justify-content-between align-items-center fade-in">
+                            <div>
+                                <strong>{{ test_question.question.text_question|truncatewords:10 }}</strong><br>
+                                <small class="text-muted">
+                                    Сложность: {{ test_question.question.difficulty }}
+                                </small>
                             </div>
+                            <a href="{% url 'remove_question_from_test' test_id=test.test_id question_id=test_question.question.question_id %}"
+                               class="btn btn-sm btn-outline-danger">Удалить</a>
+                        </div>
                         {% empty %}
-                            <div class="list-group-item text-muted">
-                                В тесте пока нет вопросов.
-                            </div>
+                        <div class="list-group-item text-muted">В тесте пока нет вопросов.</div>
                         {% endfor %}
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <a href="{% url 'create_test' %}" class="btn btn-secondary">Создать новый тест</a>
-                <a href="{% url 'index' %}" class="btn btn-primary">Завершить редактирование</a>
-                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+            <div class="d-flex gap-2 mt-3 flex-wrap">
+                <a href="{% url 'create_test' %}" class="btn btn-secondary flex-fill">Создать новый тест</a>
+                <a href="{% url 'index' %}" class="btn btn-primary flex-fill">Завершить редактирование</a>
+                <button class="btn btn-outline-primary flex-fill" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
                     + Добавить новый вопрос
                 </button>
             </div>
@@ -107,31 +92,29 @@
                 </div>
                 <div class="modal-body">
                     <input type="hidden" name="topic" value="{{ test.topic.topic_id }}">
-                  {% for field in form %}
+                    {% for field in form %}
                     <div class="mb-3">
-                      <label class="form-label">{{ field.label }}</label>
-                      {{ field }}
-                      {% if field.errors %}
+                        <label class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
                         <div class="text-danger small mt-1">{{ field.errors.as_text|cut:"*" }}</div>
-                      {% endif %}
+                        {% endif %}
                     </div>
-                  {% endfor %}
+                    {% endfor %}
 
-                  <hr>
-                  <h6>Варианты ответов</h6>
-                  <div id="answers-container">
-                    <div class="input-group mb-2 answer-row">
-                      <div class="input-group-text">
-                        <input type="radio" name="correct_answer" value="0" required>
-                      </div>
-                      <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
-                      <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+                    <hr>
+                    <h6>Варианты ответов</h6>
+                    <div id="answers-container">
+                        <div class="input-group mb-2 answer-row">
+                            <div class="input-group-text">
+                                <input type="radio" name="correct_answer" value="0" required>
+                            </div>
+                            <input type="text" name="answer_text[]" class="form-control" placeholder="Введите вариант ответа" required>
+                            <button type="button" class="btn btn-outline-danger btn-sm ms-2 remove-answer-btn">✕</button>
+                        </div>
                     </div>
-                  </div>
 
-                  <button type="button" id="addAnswerBtn" class="btn btn-outline-secondary btn-sm mt-2">
-                    + Добавить вариант
-                  </button>
+                    <button type="button" id="addAnswerBtn" class="btn btn-outline-secondary btn-sm mt-2">+ Добавить вариант</button>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Сохранить вопрос</button>
@@ -144,5 +127,4 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{% static 'testing/js/add_answers.js' %}"></script>
-</body>
-</html>
+{% endblock %}
