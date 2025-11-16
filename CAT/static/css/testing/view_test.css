@@ -1,0 +1,111 @@
+/* ---------- МОДАЛЬНОЕ ОКНО ---------- */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(2, 48, 71, 0.2);
+    animation: fadeInModal 0.3s ease;
+}
+
+@keyframes fadeInModal {
+    from {
+        opacity: 0;
+        transform: translateY(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    background-color: var(--blue-green);
+    color: #fff;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+}
+
+.modal-title {
+    font-weight: 600;
+}
+
+.btn-close-white {
+    filter: invert(1);
+}
+
+/* Тело модалки */
+.modal-body {
+    background-color: #fdfdfd;
+    padding: 1.5rem;
+    color: var(--prussian-blue);
+}
+
+.modal-body p {
+    margin-bottom: 0.6rem;
+}
+
+/* Оформление списка ответов */
+.answer-list {
+    margin-top: 1rem;
+}
+
+.answer-item {
+    background-color: #fff;
+    border: 1px solid rgba(2, 48, 71, 0.1);
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.answer-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(2, 48, 71, 0.1);
+}
+
+/* Метка правильности */
+.answer-item.correct {
+    border-left: 5px solid #21bc81;
+    background-color: rgba(142, 230, 196, 15%);
+}
+
+.answer-item.incorrect {
+    border-left: 5px solid var(--ut-orange);
+    background-color: rgba(251, 133, 0, 0.08);
+}
+
+/* Текст внутри */
+.answer-text {
+    flex-grow: 1;
+    font-size: 0.95rem;
+    color: var(--prussian-blue);
+}
+
+.correct-answer {
+    font-size: 0.9rem;
+    color: var(--ut-orange);
+}
+
+/* Подпись уровня знаний */
+#statLevel {
+    color: var(--selective-yellow);
+    font-weight: 600;
+}
+
+
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .row .col-md-3 {
+        flex: 0 0 50%;
+        max-width: 50%;
+    }
+}
+@media (max-width: 576px) {
+    .row .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}

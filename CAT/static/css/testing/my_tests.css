@@ -1,0 +1,83 @@
+.tests-container {
+    max-width: 720px;
+    margin: 0 auto;
+    margin-top: 35px;
+}
+
+.page-title {
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.tests-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.test-item {
+    background: #ffffff;
+    padding: 18px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    text-decoration: none;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: 0.2s ease;
+}
+
+.test-item:hover {
+    background: #f8f9fa;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.09);
+}
+
+.test-name {
+    font-size: 18px;
+}
+
+.test-id {
+    color: #7e8a9a;
+}
+
+.test-actions {
+    margin-top: 8px;
+}
+
+.btn-edit,
+.btn-delete {
+    padding: 5px 10px;
+    border-radius: 6px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-edit:hover {
+    background: #e7f1ff;
+    border-color: #7cb3ff;
+}
+
+.btn-delete {
+    margin-left: 6px;
+    color: #c62828;
+    border-color: #e57373;
+}
+
+.btn-delete:hover {
+    background: #ffebee;
+    border-color: #ef5350;
+}
+
+.arrow-icon {
+    font-size: 20px;
+    color: #888;
+}
+
+.no-tests {
+    color: #7e8a9a;
+    margin-top: 12px;
+}

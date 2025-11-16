@@ -3,7 +3,7 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -534,7 +534,7 @@ def adaptive_test_list(request):
 
 @login_required
 def get_test_statistics(request, session_id):
-    session = get_object_or_404(TestSessions, session_id=session_id, user=request.user)
+    session = get_object_or_404(TestSessions, session_id=session_id)
     user_answers = UserAnswers.objects.filter(session=session).select_related(
         'question', 'selected_answer', 'question__correct_answer'
     )
@@ -560,4 +560,68 @@ def get_test_statistics(request, session_id):
         'level_description': "Отличное понимание темы" if (session.current_ability_estimate or 0) >= 1.5 else "Базовое понимание темы",
         'answers': answers_data,
     })
+
+@login_required
+def my_tests(request):
+    tests = Test.objects.filter(author=request.user)
+    return render(request, "testing/my_tests.html", {"tests": tests})
+
+@login_required
+def delete_test(request, test_id):
+    test = get_object_or_404(Test, test_id=test_id, author=request.user)
+
+    if request.method == "POST":
+        test.delete()
+        messages.success(request, "Тест был успешно удалён.")
+        return redirect("my_tests")
+
+    return redirect("my_tests")
+
+@login_required
+def view_test(request, test_id):
+    test = get_object_or_404(Test, test_id=test_id)
+
+    # Проверка на права доступа: только автор может смотреть
+    if test.author != request.user:
+        return HttpResponseForbidden("У вас нет доступа к этому тесту")
+
+    # Вопросы теста
+    questions = TestQuestions.objects.filter(test=test).select_related("question")
+
+    # Все завершённые прохождения теста
+    sessions = (
+        TestSessions.objects
+        .filter(test=test)
+        .exclude(end_time=None)         # считаем завершённым, если end_time заполнено
+        .select_related("user", "status")
+    )
+
+    # Формируем данные о результатах
+    session_results = []
+
+    for s in sessions:
+        answers = UserAnswers.objects.filter(session=s)
+
+        total = answers.count()
+        correct = answers.filter(is_correct=True).count()
+
+        percent = round((correct / total) * 100, 1) if total else 0
+
+        session_results.append({
+            "session": s,
+            "correct": correct,
+            "total": total,
+            "percent": percent
+        })
+
+    context = {
+        "test": test,
+        "questions": questions,
+        "session_results": session_results
+    }
+
+    return render(request, "testing/view_test.html", context)
+
+
+
 

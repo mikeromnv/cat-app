@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Просмотр теста{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/testing/view_test.css' %}">
+
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h2 class="fw-bold mb-4">
+        <i class="bi bi-folder2-open me-2"></i>
+        {{ test.test_name }}
+    </h2>
+
+    <!-- Вопросы теста -->
+    <div class="card p-3 mb-4">
+        <h4>Вопросы</h4>
+        <ul class="list-group mt-2">
+            {% for tq in questions %}
+                <li class="list-group-item">
+                    <strong>Вопрос {{ forloop.counter }}:</strong> {{ tq.question.text_question }}
+                    <div class="mt-1 text-success">
+                        <strong>Правильный ответ:</strong> {{ tq.question.correct_answer.answer_text }}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Результаты студентов -->
+    <div class="card p-3">
+        <h4>Прошедшие тест</h4>
+
+        {% if session_results %}
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Студент</th>
+                  <th>Группа</th>
+                  <th>Дата</th>
+                  <th>Результат</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in session_results %}
+                <tr>
+                  <td>{{ r.session.user.last_name }} {{ r.session.user.first_name }}</td>
+                  <td>{{ r.session.user.num_group }}</td>
+                  <td>{{ r.session.end_time|date:"d.m.Y H:i" }}</td>
+                  <td>{{ r.percent }}%</td>
+                  <td>
+                    <button class="btn btn-outline-primary btn-sm"
+                            onclick="openTestStats({{ r.session.session_id }})">
+                      Смотреть
+                    </button>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+
+        {% else %}
+            <p class="text-muted">Этот тест ещё никто не проходил.</p>
+        {% endif %}
+    </div>
+    <!-- Модальное окно -->
+    <div class="modal fade" id="testStatsModal" tabindex="-1" aria-labelledby="testStatsLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="testStatsLabel">Результаты теста</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <p><strong>Название теста:</strong> <span id="statTestName"></span></p>
+              <p><strong>Всего вопросов:</strong> <span id="statTotal"></span></p>
+              <p><strong>Правильных ответов:</strong> <span id="statCorrect"></span></p>
+              <p><strong>Точность:</strong> <span id="statAccuracy"></span>%</p>
+              <p><strong>Theta:</strong> <span id="statTheta"></span></p>
+              <p><strong>Стандартная ошибка:</strong> <span id="statError"></span></p>
+              <hr>
+              <h6><strong>Уровень знаний:</strong> <span id="statLevel"></span></h6>
+              <p id="statDescription" class="text-muted"></p>
+            </div>
+
+            <hr>
+            <h6 class="mt-3"><strong>Ответы студента:</strong></h6>
+            <div id="statAnswers" class="answer-list"></div>
+
+              <table class="table table-striped align-middle">
+                <thead>
+                  <tr>
+                    <th>№</th>
+                    <th>Вопрос</th>
+                    <th>Ваш ответ</th>
+                    <th>Статус</th>
+                    <th>Правильный ответ</th>
+                  </tr>
+                </thead>
+                <tbody id="answersTable"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function openTestStats(sessionId) {
+  fetch(`/get_test_statistics/${sessionId}/`)
+    .then(response => response.json())
+    .then(data => {
+      if (!data.success) throw new Error("Ошибка данных");
+
+      // --- Основная статистика ---
+      document.getElementById('statTestName').textContent = data.test_name;
+      document.getElementById('statTotal').textContent = data.total_questions;
+      document.getElementById('statCorrect').textContent = data.correct_answers;
+      document.getElementById('statAccuracy').textContent = data.accuracy;
+      document.getElementById('statTheta').textContent = data.theta;
+      document.getElementById('statError').textContent = data.standard_error;
+      document.getElementById('statLevel').textContent = data.knowledge_level;
+      document.getElementById('statDescription').textContent = data.level_description;
+
+      // --- Таблица ответов ---
+      const tableBody = document.getElementById('answersTable');
+      tableBody.innerHTML = '';
+
+      data.answers.forEach((ans, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx + 1}</td>
+          <td>${ans.question}</td>
+          <td>${ans.selected || '—'}</td>
+          <td class="${ans.is_correct ? 'correct-answer' : 'wrong-answer'}">
+            ${ans.is_correct ? 'Верно' : 'Ошибка'}
+          </td>
+          <td>${ans.correct}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      // --- Answer-list (красивые карточки ответов) ---
+      const answersContainer = document.getElementById('statAnswers');
+      answersContainer.innerHTML = '';
+
+      if (data.answers && data.answers.length > 0) {
+        data.answers.forEach(ans => {
+          const div = document.createElement('div');
+          div.classList.add('answer-item', ans.is_correct ? 'correct' : 'incorrect');
+          div.innerHTML = `
+            <span class="answer-text">${ans.question}</span>
+            ${!ans.is_correct ? `<span class="correct-answer">Правильный: ${ans.correct}</span>` : ''}
+          `;
+          answersContainer.appendChild(div);
+        });
+      }
+
+      // --- Показ модального окна ---
+      new bootstrap.Modal(document.getElementById('testStatsModal')).show();
+    })
+    .catch(err => {
+      console.error("Ошибка загрузки статистики:", err);
+      alert("Не удалось загрузить данные теста.");
+    });
+}
+</script>
+
+
+{% endblock %}

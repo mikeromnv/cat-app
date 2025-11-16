@@ -8,6 +8,7 @@
             {% if user.role and user.role.role_name == "Преподаватель" %}
                 <li><a href="{% url 'questions' %}">Вопросы</a></li>
                 <li><a href="{% url 'create_test' %}">Создать тест</a></li>
+                <li><a href="{% url 'my_tests' %}">Мои тесты</a></li>
             {% elif user.role and user.role.role_name == "Студент" %}
                 <li><a href="{% url 'student_profile' %}">Профиль</a></li>
             {% endif %}

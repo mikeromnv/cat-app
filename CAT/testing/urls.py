@@ -27,6 +27,10 @@ urlpatterns = [
 
     path('get_test_statistics/<int:session_id>/', views.get_test_statistics, name='get_test_statistics'),
 
+    path("my_tests/", views.my_tests, name="my_tests"),
+    path("delete_test/<int:test_id>/", views.delete_test, name="delete_test"),
+    path("test/<int:test_id>/", views.view_test, name="view_test"),
+    # path('teacher_test_stats/<int:session_id>/', views.teacher_test_stats, name='teacher_test_stats'),
 
 
 
