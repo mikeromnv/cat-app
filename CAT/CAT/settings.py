@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
     'testing',
     'accounts',
 ]
@@ -79,7 +80,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'CAT',       # имя базы данных
         'USER': 'postgres',           # пользователь
-        'PASSWORD': 'mike&desktop007',   # пароль
+        'PASSWORD': 'mike&uni',   # пароль
         'HOST': 'localhost',        # адрес сервера
         'PORT': '5432',             # порт
         'OPTIONS': {

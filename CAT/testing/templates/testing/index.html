@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
-{% block title %}Главная — CATWise{% endblock %}
+{% block title %}Главная — WiseCAT{% endblock %}
 
 {% block content %}
 <div class="text-center fade-in">
-    <h1>CATWise</h1>
+    <h1>WiseCAT</h1>
     <p>Адаптивное тестирование под твой уровень знаний 🎯</p>
 
     {% if not user.is_authenticated %}
@@ -25,7 +25,7 @@
 
                 {% if user.is_authenticated and user.role.role_name == "Студент" %}
                     <a href="{% url 'start_adaptive_test' test_id=test.test_id %}" class="btn success">Пройти тест</a>
-                {% else %}
+                {% elif not user.is_authenticated %}
                     <a href="{% url 'login' %}" class="btn outline">Войти, чтобы пройти</a>
                 {% endif %}
             </div>

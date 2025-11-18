@@ -20,7 +20,7 @@ class CATAlgorithm3PL:
         """Логарифмическая функция правдоподобия"""
         log_lik = 0.0
         for response, question in zip(responses, questions):
-            # Преобразуем Decimal в float
+            # decimal в float
             a = float(question.discrimination) if question.discrimination else 1.0
             b = float(question.difficulty) if question.difficulty else 0.0
             c = float(question.guessing) if question.guessing else 0.25
@@ -40,7 +40,7 @@ class CATAlgorithm3PL:
             return float(initial_theta), 1.0
 
         try:
-            # scipy minimize
+            # scipy minimize - функция из библиотеки
             result = minimize(
                 self.log_likelihood,
                 float(initial_theta),
@@ -89,11 +89,11 @@ class CATAlgorithm3PL:
 
     def should_stop_test(self, se, questions_answered, theta_history=None):
         """Критерий остановки теста"""
-        # По достижении максимального количества вопросов
+        # максимальное количества вопросов
         if questions_answered >= self.max_questions:
             return True, "max_questions"
 
-        # По достижении точности оценки
+        # точность оценки
         if se < self.precision_threshold:
             return True, "precision"
 

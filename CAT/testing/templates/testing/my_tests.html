@@ -2,9 +2,11 @@
 {% load static %}
 
 {% block title %}Мои тесты{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/testing/my_tests.css' %}">
+{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{% static 'css/testing/my_tests.css' %}">
 
 <div class="tests-container">
 
@@ -15,32 +17,32 @@
     {% if tests %}
         <div class="tests-list">
             {% for test in tests %}
-                <a href="{% url 'view_test' test_id=test.test_id %}"
-                   class="test-item">
+                <div class="test-item-wrapper">
 
-                    <div class="test-info">
-                        <strong class="test-name">{{ test.test_name }}</strong>
-                        <small class="test-id">ID: {{ test.test_id }}</small>
+                    <a href="{% url 'view_test' test_id=test.test_id %}" class="test-item-link">
+                        <div class="test-info">
+                            <strong class="test-name">{{ test.test_name }}</strong>
+                            <small class="test-id">ID: {{ test.test_id }}</small>
+                        </div>
 
-                        {% if user.is_authenticated and user.role.role_name == "Преподаватель" %}
-                            <div class="test-actions">
-                                <a href="{% url 'edit_test' test_id=test.test_id %}"
-                                   class="btn-edit">
-                                    Редактировать
-                                </a>
+                        <i class="bi bi-chevron-right arrow-icon"></i>
+                    </a>
 
-                                <button class="btn-delete"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal{{ test.test_id }}"
-                                        onclick="event.stopPropagation();">
-                                    Удалить
-                                </button>
-                            </div>
-                        {% endif %}
-                    </div>
+                    {% if user.is_authenticated and user.role.role_name == "Преподаватель" %}
+                        <div class="test-actions">
+                            <a href="{% url 'edit_test' test_id=test.test_id %}" class="btn-edit">
+                                Редактировать
+                            </a>
 
-                    <i class="bi bi-chevron-right arrow-icon"></i>
-                </a>
+                            <button class="btn-delete"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal{{ test.test_id }}">
+                                Удалить
+                            </button>
+                        </div>
+                    {% endif %}
+
+                </div>
 
                 <!-- Модалка -->
                 <div class="modal fade" id="deleteModal{{ test.test_id }}" tabindex="-1">
@@ -73,6 +75,7 @@
 
             {% endfor %}
         </div>
+
     {% else %}
         <p class="no-tests">У вас пока нет созданных тестов.</p>
     {% endif %}
