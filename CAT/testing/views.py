@@ -2,6 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.http import JsonResponse, HttpResponseForbidden
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_http_methods
 
@@ -158,7 +159,8 @@ def edit_test(request, test_id):
         messages.error(request, 'Вы не можете редактировать этот тест.')
         return redirect('index')
 
-    questions = Questions.objects.filter(topic=test.topic)
+    included_question_ids = TestQuestions.objects.filter(test=test).values_list('question_id', flat=True)
+    questions = Questions.objects.filter(topic=test.topic).exclude(pk__in=included_question_ids)
 
     test_questions = TestQuestions.objects.filter(test=test).select_related('question')
 
@@ -189,6 +191,7 @@ def edit_test(request, test_id):
                 test.num_of_questions = TestQuestions.objects.filter(test=test).count()
                 test.save()
 
+
             messages.success(request, 'Вопрос успешно создан и добавлен в тест!')
             return redirect('edit_test', test_id=test_id)
         else:
@@ -215,10 +218,50 @@ def add_question_to_test(request, test_id, question_id):
     TestQuestions.objects.get_or_create(test=test, question=question)
 
     test.num_of_questions = TestQuestions.objects.filter(test=test).count()
+
+    if test.num_of_questions < 15:
+        messages.warning(request, f'В тесте пока только {test.num_of_questions} вопросов. Минимум — 15.')
+
     test.save()
 
     messages.success(request, f'Вопрос добавлен в тест "{test.test_name}"')
     return redirect('edit_test', test_id=test_id)
+
+
+@login_required
+def finish_creating_test(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+
+    if test.author != request.user:
+        messages.error(request, "Вы не можете завершить этот тест.")
+        return redirect('index')
+
+    num_questions = TestQuestions.objects.filter(test=test).count()
+
+    if num_questions < 15:
+        messages.warning(request, "В тесте должно быть минимум 15 вопросов!")
+
+        url = reverse('edit_test', kwargs={'test_id': test_id})
+        return redirect(f"{url}?not_ready=1")
+
+    messages.success(request, "Тест успешно завершён!")
+    return redirect('index')
+
+
+    messages.success(request, 'Тест успешно завершён и готов к использованию!')
+    return redirect('my_tests')
+
+# @login_required
+# def delete_test(request, test_id):
+#     test = get_object_or_404(Test, pk=test_id)
+#
+#     if test.author != request.user:
+#         messages.error(request, 'Вы не можете удалить этот тест.')
+#         return redirect('index')
+#
+#     test.delete()
+#     messages.success(request, 'Тест удалён.')
+#     return redirect('my_tests')
 
 
 @login_required
@@ -268,7 +311,7 @@ def start_adaptive_test(request, test_id):
         #первый вопрос
         available_questions = Questions.objects.filter(topic=test.topic)
         if available_questions.exists():
-            cat = CATAlgorithm3PL()
+            cat = CATAlgorithm3PL(max_questions=test.num_of_questions)
             first_question = cat.select_next_question(0.0, list(available_questions), [])
             session.next_question = first_question
             session.save()
@@ -301,7 +344,7 @@ def take_adaptive_test(request, session_id):
         'session': session,
         'question': current_question,
         'answers': answers,
-        'progress_percentage': min(100, (session.useranswers_set.count() / 30) * 100),
+        'progress_percentage': min(100, ((session.useranswers_set.count() / session.test.num_of_questions) * 100)),
     }
 
     return render(request, 'testing/take_adaptive_test.html', context)

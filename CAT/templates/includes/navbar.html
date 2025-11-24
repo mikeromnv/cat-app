@@ -4,6 +4,7 @@
     </div>
 
     <ul class="menu">
+        <li><a href="{% url 'index' %}">Главная</a></li>
         {% if user.is_authenticated %}
             {% if user.role and user.role.role_name == "Преподаватель" %}
                 <li><a href="{% url 'questions' %}">Вопросы</a></li>

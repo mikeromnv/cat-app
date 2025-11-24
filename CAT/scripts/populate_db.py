@@ -19,7 +19,7 @@ def run():
         defaults={
             'first_name': 'Иван',
             'last_name': 'Иванов',
-            'role': teacher_role,
+            'role': 'Преподаватель',
             'is_staff': True,
             'is_superuser': True,
             'registration_date': timezone.now(),

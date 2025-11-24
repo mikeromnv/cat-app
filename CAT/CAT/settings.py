@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django_extensions',
     'testing',
     'accounts',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -50,8 +51,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
+# INTERNAL_IPS = ['127.0.0.1']
 ROOT_URLCONF = 'CAT.urls'
 
 TEMPLATES = [
@@ -80,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'CAT',       # имя базы данных
         'USER': 'postgres',           # пользователь
-        'PASSWORD': 'mike&uni',   # пароль
+        'PASSWORD': 'mike&desktop007',   # пароль
         'HOST': 'localhost',        # адрес сервера
         'PORT': '5432',             # порт
         'OPTIONS': {

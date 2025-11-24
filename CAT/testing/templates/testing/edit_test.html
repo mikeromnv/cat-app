@@ -8,6 +8,15 @@
 {% endblock %}
 
 {% block content %}
+{% if request.GET.not_ready %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let modal = new bootstrap.Modal(document.getElementById('notReadyModal'));
+    modal.show();
+});
+</script>
+{% endif %}
+
 <div class="container mt-4 mb-5 fade-in" style="max-width: 1000px;">
 
     {% if messages %}
@@ -70,7 +79,10 @@
 
             <div class="d-flex gap-2 mt-3 flex-wrap">
                 <a href="{% url 'create_test' %}" class="btn btn-secondary flex-fill">Создать новый тест</a>
-                <a href="{% url 'index' %}" class="btn btn-primary flex-fill">Завершить редактирование</a>
+                <form action="{% url 'finish_creating_test' test.test_id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Завершить создание теста</button>
+                </form>
                 <button class="btn btn-outline-primary flex-fill" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
                     + Добавить новый вопрос
                 </button>
@@ -121,6 +133,77 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+<!-- Модальное окно: Недостаточно вопросов -->
+<div class="modal fade" id="notReadyModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-sm border-0" style="border-radius: 14px;">
+
+            <div class="modal-header bg-warning bg-opacity-25" style="border-top-left-radius:14px; border-top-right-radius:14px;">
+                <h5 class="modal-title text-warning fw-bold">
+                    Недостаточно вопросов
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                <p class="mb-2">
+                    В тесте содержится <strong>{{ test.num_of_questions }}</strong> вопросов.
+                </p>
+                <p class="fw-semibold">
+                    Для корректной работы адаптивного алгоритма необходимо минимум <strong>15 вопросов</strong>.
+                </p>
+                <p>Добавьте ещё вопросы или удалите тест.</p>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+
+                <!-- Кнопка удаления -->
+                <button class="btn btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#deleteModal{{ test.test_id }}">
+                    Удалить тест
+                </button>
+
+                <!-- Продолжить -->
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Продолжить редактирование
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="deleteModal{{ test.test_id }}" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-sm border-0" style="border-radius: 14px;">
+
+            <div class="modal-header bg-danger bg-opacity-25" style="border-top-left-radius:14px; border-top-right-radius:14px;">
+                <h5 class="modal-title text-danger fw-bold">Удаление теста</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+                Вы действительно хотите удалить тест
+                <strong>"{{ test.test_name }}"</strong>?
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Отмена
+                </button>
+
+                <form method="POST" action="{% url 'delete_test' test_id=test.test_id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">
+                        Удалить
+                    </button>
+                </form>
+            </div>
+
         </div>
     </div>
 </div>

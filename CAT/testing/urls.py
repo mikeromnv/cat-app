@@ -11,6 +11,7 @@ urlpatterns = [
     path('add-question/', views.add_question, name='add_question'),
     path('create_test/', views.create_test, name='create_test'),
     path('edit-test/<int:test_id>/', views.edit_test, name='edit_test'),
+    path('test/<int:test_id>/finish/', views.finish_creating_test, name='finish_creating_test'),
     path('add-question-to-test/<int:test_id>/<int:question_id>/', views.add_question_to_test,
          name='add_question_to_test'),
     path('remove-question-from-test/<int:test_id>/<int:question_id>/', views.remove_question_from_test,
