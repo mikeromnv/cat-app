@@ -164,14 +164,13 @@ def edit_test(request, test_id):
 
     test_questions = TestQuestions.objects.filter(test=test).select_related('question')
 
-    # Обработка создания нового вопроса
     if request.method == 'POST' and 'text_question' in request.POST:
         form = QuestionForm(request.POST)
         answers = request.POST.getlist('answer_text[]')
         correct_answer_index = request.POST.get('correct_answer')
 
         if form.is_valid() and answers:
-            with transaction.atomic(): #Сгруппировать серию операций с базой данных в одну транзакцию.
+            with transaction.atomic(): #atomic-сгрупировать серию операций с базой данных в одну транзакцию.
                 question = form.save(commit=False)
                 question.author = request.user
                 question.topic = test.topic
@@ -246,23 +245,6 @@ def finish_creating_test(request, test_id):
 
     messages.success(request, "Тест успешно завершён!")
     return redirect('index')
-
-
-    messages.success(request, 'Тест успешно завершён и готов к использованию!')
-    return redirect('my_tests')
-
-# @login_required
-# def delete_test(request, test_id):
-#     test = get_object_or_404(Test, pk=test_id)
-#
-#     if test.author != request.user:
-#         messages.error(request, 'Вы не можете удалить этот тест.')
-#         return redirect('index')
-#
-#     test.delete()
-#     messages.success(request, 'Тест удалён.')
-#     return redirect('my_tests')
-
 
 @login_required
 def remove_question_from_test(request, test_id, question_id):
@@ -463,7 +445,7 @@ def adaptive_test_results(request, session_id):
     theta = float(session.current_ability_estimate) if session.current_ability_estimate else 0.0
     standard_error = float(session.standard_error) if session.standard_error else 1.0
 
-    # Определяем уровень знаний
+    # оценка уровень знаний
     if theta >= 1.5:
         knowledge_level = "Экспертный"
         level_description = "Отличное понимание темы"

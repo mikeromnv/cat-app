@@ -55,7 +55,6 @@ document.addEventListener("DOMContentLoaded", function() {
                     </div>
                 </div>
 
-                <!-- Вопросы в тесте -->
                 <div class="col-md-6 mb-4">
                     <h5>Вопросы в тесте ({{ test_questions.count }})</h5>
                     <div class="list-group">
@@ -91,7 +90,6 @@ document.addEventListener("DOMContentLoaded", function() {
     </div>
 </div>
 
-<!-- Модальное окно для добавления нового вопроса -->
 <div class="modal fade" id="addQuestionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -136,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function() {
         </div>
     </div>
 </div>
-<!-- Модальное окно: Недостаточно вопросов -->
+
 <div class="modal fade" id="notReadyModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content shadow-sm border-0" style="border-radius: 14px;">
@@ -160,7 +158,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
             <div class="modal-footer d-flex justify-content-between">
 
-                <!-- Кнопка удаления -->
                 <button class="btn btn-outline-danger"
                         data-bs-toggle="modal"
                         data-bs-target="#deleteModal{{ test.test_id }}">

@@ -5,15 +5,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import RegisterForm, ProfileUpdateForm
 from testing.models import TestSessions, UserAnswers, Topic
-# TESTING_AVAILABLE = True
-# ИСПРАВЛЕННЫЕ ИМПОРТЫ - убрать ..
-# try:
-#     from testing.models import TestSessions, UserAnswers, Topic
-#
-#     TESTING_AVAILABLE = True
-# except ImportError as e:
-#     print(f"Testing models import error: {e}")
-#     TESTING_AVAILABLE = False
 
 def register_view(request):
     if request.method == 'POST':
@@ -57,20 +48,6 @@ def student_profile(request):
     if not hasattr(user, 'role') or not user.role or user.role.role_name != 'Студент':
         messages.error(request, 'Эта страница доступна только студентам.')
         return redirect('index')
-
-    # Если testing модели недоступны
-    # if not TESTING_AVAILABLE:
-    #     context = {
-    #         'user': user,
-    #         'total_tests': 0,
-    #         'total_questions': 0,
-    #         'total_correct': 0,
-    #         'overall_accuracy': 0,
-    #         'topics_progress': [],
-    #         'recent_sessions': [],
-    #         'testing_available': False
-    #     }
-    #     return render(request, 'accounts/student_profile.html', context)
 
     try:
         # Статистика по тестированиям

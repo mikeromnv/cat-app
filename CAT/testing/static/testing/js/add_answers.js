@@ -1,5 +1,3 @@
-// add_answers.js
-
 document.addEventListener('DOMContentLoaded', function () {
     const addAnswerBtn = document.getElementById('addAnswerBtn');
     const answersContainer = document.getElementById('answers-container');
@@ -30,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = e.target.closest('.answer-row');
             if (row) {
                 row.remove();
-                // После удаления — обновим value у радио-кнопок (чтобы индексы совпадали)
                 const radios = answersContainer.querySelectorAll('input[type="radio"][name="correct_answer"]');
                 radios.forEach((radio, i) => {
                     radio.value = i;

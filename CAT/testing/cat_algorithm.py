@@ -21,7 +21,6 @@ class CATAlgorithm3PL:
             return 0.5
 
     def log_likelihood(self, theta, responses, questions):
-        """Логарифмическая функция правдоподобия"""
         log_lik = 0.0
         for response, question in zip(responses, questions):
             # decimal в float
@@ -46,7 +45,7 @@ class CATAlgorithm3PL:
             return float(initial_theta), 1.0
 
         try:
-            # scipy minimize - функция из библиотеки
+            # scipy minimize - функция из библиотеки для поиска экстремума
             result = minimize(
                 self.log_likelihood,
                 float(initial_theta),

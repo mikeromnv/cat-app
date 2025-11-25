@@ -13,7 +13,6 @@ loadMoreBtn.addEventListener('click', () => {
 
             container.insertAdjacentHTML('beforeend', newQuestions);
 
-            // Если новых вопросов нет — скрываем кнопку
             if (!newQuestions.trim()) {
                 loadMoreBtn.style.display = 'none';
             }

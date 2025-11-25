@@ -1,5 +1,3 @@
-// questions_delete.js
-
 document.addEventListener("DOMContentLoaded", function () {
     const container = document.getElementById("questions-container");
 
@@ -37,7 +35,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    // Получаем CSRF-токен из cookie
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {

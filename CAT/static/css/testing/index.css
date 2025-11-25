@@ -124,7 +124,7 @@ body {
   color: white;
 }
 
-/* ==== Cards ==== */
+
 .tests-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -149,7 +149,6 @@ body {
   margin-bottom: 0.5rem;
 }
 
-/* ==== Animations ==== */
 .fade-in {
   animation: fadeIn 0.8s ease-in;
 }
@@ -159,7 +158,6 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ==== Alerts ==== */
 .alert {
   background: var(--sky-blue);
   padding: 1rem;
